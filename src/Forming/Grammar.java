@@ -17,14 +17,18 @@ public class Grammar {
 		this._rules = _rules;
 		this._startSymbol = _startSymbol;
 		
-		System.out.println("Is valid ???? "+ productionRulesAreInTuneWithNonTerminalsymbols());
+		System.out.println("Is valid grammar: "+ productionRulesAreInTuneWithNonTerminalsymbols());
 	}
 	
 	public boolean productionRulesAreInTuneWithNonTerminalsymbols() {
-		for (char symbol: _nonTerminalSymbols.getAllSigns()) {
-			boolean contains = true;
+		boolean canStart = false;
+		
+		for (String symbol: _nonTerminalSymbols.getAllSigns()) {
 			
 			for (ProductionRule pr: _rules) {
+				// Check for start
+				canStart = canStart | pr.getFrom().equals(this._startSymbol);
+				
 				ArrayList<String> set = new ArrayList<String>();
 				set.add(pr.getFrom());
 				
@@ -32,14 +36,13 @@ public class Grammar {
 					set.add(str);
 				}
 				
-				if (set.contains(Character.toString(symbol))) break;
-				else contains = false;
+				if (set.contains(symbol)) break;
+				else return false;
 			}
 			
-			return contains;
 		}
 		
-		return true;
+		return true && canStart;
 	}
 	
 	

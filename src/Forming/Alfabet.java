@@ -2,21 +2,21 @@ package Forming;
 
 public class Alfabet {
 	
-	private char[] _allSigns;
+	private String[] _allSigns;
 	
-	public Alfabet(char... signs) {
+	public Alfabet(String... signs) {
 		this._allSigns = signs;
 	}
 	
-	public boolean hasSign(char c) {
-		for (char sign: _allSigns) {
+	public boolean hasSign(String c) {
+		for (String sign: _allSigns) {
 			if (sign == c) return true;
 		}
 		
 		return false;
 	}
 	
-	public char[] getAllSigns() {
+	public String[] getAllSigns() {
 		return this._allSigns;
 	}
 }
