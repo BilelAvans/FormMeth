@@ -5,11 +5,12 @@ import java.util.Arrays;
 public class ProductionRule {
 	
 	private String _from;
-	private String[] _to;
 	
-	public ProductionRule(String _from, String... _to) {
+	private TransitionRule[] _rules;
+	
+	public ProductionRule(String _from, TransitionRule... tRules) {
 		this._from = _from;
-		this._to = _to;
+		this._rules = tRules;
 	}
 	
 	
@@ -18,11 +19,9 @@ public class ProductionRule {
 		return _from;
 	}
 
-	public String[] getTo() {
-		return _to;
+	public TransitionRule[] getTransitions() {
+		return this._rules;
 	}
-
-
 
 	@Override
 	public String toString() {
