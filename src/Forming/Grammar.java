@@ -20,6 +20,18 @@ public class Grammar {
 		System.out.println("Is valid grammar: "+ productionRulesAreInTuneWithNonTerminalsymbols());
 	}
 	
+	public boolean isValidString(String str) {
+		for(char c: str.toCharArray()) {
+			// Definitely no if it's not even in our alfabet.
+			if (!_alfabet.hasSign(Character.toString(c))) return false;
+			
+			
+				
+		}
+		
+		return true;
+	}
+	
 	public boolean productionRulesAreInTuneWithNonTerminalsymbols() {
 		boolean canStart = false;
 		
