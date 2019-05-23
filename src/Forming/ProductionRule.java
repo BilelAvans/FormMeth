@@ -1,16 +1,21 @@
 package Forming;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ProductionRule {
 	
 	private String _from;
 	
-	private TransitionRule[] _rules;
+	private ArrayList<TransitionRule> _rules = new ArrayList<>();
 	
-	public ProductionRule(String _from, TransitionRule... tRules) {
+	// Can this be an end state?
+	private boolean _isEnd;
+	
+	public ProductionRule(String _from, boolean isEndState, TransitionRule... tRules) {
 		this._from = _from;
-		this._rules = tRules;
+		this._isEnd = isEndState;
+		this._rules = new ArrayList<TransitionRule>(Arrays.asList(tRules));
 	}
 	
 	
@@ -19,28 +24,21 @@ public class ProductionRule {
 		return _from;
 	}
 
-	public TransitionRule[] getTransitions() {
+	public ArrayList<TransitionRule> getTransitions() {
 		return this._rules;
 	}
 
 	@Override
 	public String toString() {
 		
+		return "";
 		
-		if (_to.length == 0)
-			return "";
-		if (_to.length == 1)
-			return _from + " -> "+ _to[0];
-		else {
-			String buildString = _from +" -> { ";
-			
-			for (String str: _to) {
-				_from += str + ", ";
-			}
-			
-			return buildString;
-		}
-		
+	}
+
+
+
+	public boolean isEndState() {
+		return this._isEnd;
 	}
 	
 	

@@ -10,7 +10,7 @@ public class Alfabet {
 	
 	public boolean hasSign(String c) {
 		for (String sign: _allSigns) {
-			if (sign == c) return true;
+			if (sign.equals(c)) return true;
 		}
 		
 		return false;

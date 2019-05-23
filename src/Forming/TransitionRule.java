@@ -2,16 +2,34 @@ package Forming;
 
 public class TransitionRule {
 
-	public String _sign;
+	// Sign from our alfabet.
+	private String _sign;
+	// Where will it lead
+	private String _goTo;
 	
-	public String _goTo;
-	
-	boolean _isEnd;
-	
-	public TransitionRule(String sign, String goTo, boolean isEnd) {
+	public TransitionRule(String sign, String goTo) {
 		this._sign = sign;
 		this._goTo = goTo;
-		this._isEnd = isEnd;
+	}
+	
+	
+	
+	public String getSign() {
+		return _sign;
+	}
+
+
+
+	public String getGoTo() {
+		return _goTo;
+	}
+
+
+	@Override
+	public String toString() {
+		return "";
+//		return _isEnd ? _sign + " -> " + _sign + _goTo + " | "+ _sign : 
+//						_sign + " -> " + _sign + _goTo;
 	}
 	
 }
