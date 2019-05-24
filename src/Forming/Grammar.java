@@ -18,8 +18,6 @@ public class Grammar {
 		this._rules = new ArrayList<ProductionRule>(Arrays.asList(_rules));
 		this._nonTerminalSymbols = new Alfabet((String[])this._rules.stream().map(ProductionRule::getFrom).toArray(String[]::new));
 		this._startSymbol = _startSymbol;
-		
-		System.out.println("Is valid grammar: "+ productionRulesAreInTuneWithNonTerminalsymbols());
 	}
 	
 	public boolean isValidString(String str, boolean mustEnd) {

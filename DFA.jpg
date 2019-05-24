@@ -1,1 +1,0 @@
-digraph { a -> c [ label="a", weigth="0.6"];}

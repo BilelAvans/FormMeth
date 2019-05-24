@@ -7,9 +7,7 @@ import java.io.PrintWriter;
 
 public class GraphwizExec {
 	
-	
 	public static boolean saveTextFile(String filename, String content) {
-		
 		File file = new File(System.getProperty("user.dir") + "/"+filename);
 		
 		try {
@@ -22,19 +20,16 @@ public class GraphwizExec {
 		}
 		
 		return true;
-		
 	}
-
 	
 	public static boolean openDotExeCodeString(IMethodAsString method) {
-		System.out.println(method.getMethodAsGraphVizString());
 		// Save our string as a file first
 		if (saveTextFile(method.getMethodName(), method.getMethodAsGraphVizString())) {
 			try {
 				// Call the file and create a 'jpg'
-				Process process = new ProcessBuilder("C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe","-Tjpeg", method.getMethodName(),"-o","graph2.jpg").start();
+				Process process = new ProcessBuilder("C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe","-Tjpeg", method.getMethodName(),"-o","graph.jpg").start();
 				
-				new ImageDisplay(System.getProperty("user.dir") + "/graph2.jpg");
+				new ImageDisplay(System.getProperty("user.dir") + "/graph.jpg");
 				
 				// Open the JPeg in your standard photo viewer
 				

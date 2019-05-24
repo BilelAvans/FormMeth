@@ -32,10 +32,16 @@ public class Former {
 	}
 	
 	private static void generateNFA() {
-		
-		
 		GraphwizExec graph = new GraphwizExec();
-		boolean thisWorks = graph.openDotExeCodeString(new DFA());
+		Alfabet alfabet = new Alfabet("a", "b");
+		DFA dfa = new DFA(alfabet);
+		System.out.println("DFA correct: "+ (dfa.everyNodeHasEverySymbol() == ""));
+		
+		System.out.println("Valid string: "+ dfa.isValidString("a"));
+		
+		System.out.println("Valid string: "+ dfa.isValidString("aaaaaaaaabaaa"));
+		
+		boolean thisWorks = graph.openDotExeCodeString(dfa);
 		
 	}
 }

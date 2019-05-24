@@ -1,1 +1,1 @@
-digraph { a -> c [ label="a", weigth="0.6"];}
+digraph { S -> A [ label="a", weigth="0.6"];S -> A [ label="b", weigth="0.6"];A -> A [ label="a", weigth="0.6"];A -> A [ label="b", weigth="0.6"];}

@@ -6,7 +6,7 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="src/commons-net-3.6.jar">
+	<classpathentry kind="lib" path="C:/Users/nlbghieb/eclipse-workspace/FormMeth/commons-net-3.6.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>

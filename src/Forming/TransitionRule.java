@@ -23,7 +23,14 @@ public class TransitionRule {
 	public String getGoTo() {
 		return _goTo;
 	}
+	
+	public boolean hasSign(String sign) {
+		return _sign == sign;
+	}
 
+	public boolean hasGoTo(String goTo) {
+		return _goTo == goTo;
+	}
 
 	@Override
 	public String toString() {
