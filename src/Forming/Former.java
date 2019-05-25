@@ -1,12 +1,11 @@
 package Forming;
 
-import java.util.ArrayList;
-
 import Parsing.GraphwizExec;
 
 public class Former {
 	public static void main(String[] args) {
-		generateNFA();
+		//generateNFA();
+		generateNFAFromString("abcdefg");
 	}
 	
 	private static void testGrammar() {
@@ -38,6 +37,17 @@ public class Former {
 		System.out.println("DFA correct: "+ (dfa.everyNodeHasEverySymbol() == ""));
 		
 		System.out.println("Valid string: "+ dfa.isValidString("a"));
+		
+		System.out.println("Valid string: "+ dfa.isValidString("aaaaaaaaabaaa"));
+		
+		boolean thisWorks = graph.openDotExeCodeString(dfa);
+		
+	}
+	
+	private static void generateNFAFromString(String matchingString) {
+		GraphwizExec graph = new GraphwizExec();
+		
+		DFA dfa = DFA.GenerateDFA(matchingString);
 		
 		System.out.println("Valid string: "+ dfa.isValidString("aaaaaaaaabaaa"));
 		

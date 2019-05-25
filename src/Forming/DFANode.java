@@ -19,9 +19,7 @@ public class DFANode {
 		this._state = _stateName;
 		this._isEndSymbol = isEndSymbol;
 		
-		for(TransitionRule transition: transitions) {
-			_transitions.add(transition);
-		}
+		addTransitions(transitions);
 	}
 
 
@@ -38,6 +36,12 @@ public class DFANode {
 	public ArrayList<TransitionRule> get_transitions() {
 		return _transitions;
 	}
+	
+	public void addTransitions(TransitionRule... transitions) {
+		for(TransitionRule transition: transitions) {
+			_transitions.add(transition);
+		}
+	}
 
 
 	public void set_transitions(ArrayList<TransitionRule> _transitions) {
@@ -52,6 +56,14 @@ public class DFANode {
 
 	public void set_isEndSymbol(boolean isEndSymbol) {
 		this._isEndSymbol = isEndSymbol;
+	}
+	
+	@Override
+	public boolean equals(Object ob) {
+		if (ob instanceof DFANode)
+			return ((DFANode)ob)._state.equals(this._state);
+		
+		return false;
 	}
 	
 	

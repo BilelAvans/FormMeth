@@ -118,6 +118,41 @@ public class Grammar {
 		
 		return canStart;
 	}
+
+	public Alfabet get_nonTerminalSymbols() {
+		return _nonTerminalSymbols;
+	}
+
+	public void set_nonTerminalSymbols(Alfabet _nonTerminalSymbols) {
+		this._nonTerminalSymbols = _nonTerminalSymbols;
+	}
+
+	public Alfabet get_alfabet() {
+		return _alfabet;
+	}
+
+	public void set_alfabet(Alfabet _alfabet) {
+		this._alfabet = _alfabet;
+	}
+
+	public ArrayList<ProductionRule> get_rules() {
+		return _rules;
+	}
+
+	public void set_rules(ArrayList<ProductionRule> _rules) {
+		this._rules = _rules;
+	}
+
+	public String get_startSymbol() {
+		return _startSymbol;
+	}
+
+	public void set_startSymbol(String _startSymbol) {
+		this._startSymbol = _startSymbol;
+	}
+	
+	
+	
 	
 	
 }

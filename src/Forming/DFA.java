@@ -3,9 +3,11 @@ package Forming;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import Parsing.IMethodAsString;
@@ -14,14 +16,23 @@ public class DFA implements IMethodAsString {
 	
 	private Alfabet _alfabet;
 	
-	private	ArrayList<DFANode> _nodes = new ArrayList<DFANode>();
+	private	List<DFANode> _nodes = new ArrayList<DFANode>();
 
 	private final String _startState;
 	
 	// Create from Grammar
 	private DFA(Grammar grammar) {
-		_startState = "";
+		
+		this._alfabet = grammar.get_alfabet();
+		this._startState = grammar.get_startSymbol();
+
+		for (ProductionRule tr: grammar.get_rules()) {
+			
+			_nodes.add(new DFANode(tr.getFrom(), tr.isEndState(), (TransitionRule[])tr.getTransitions().toArray()));
+
+		}
 	}
+	
 	// Test case
 	public DFA(Alfabet alfa) {
 		_alfabet = alfa;
@@ -34,9 +45,9 @@ public class DFA implements IMethodAsString {
 											new TransitionRule("b", "A")));
 	}
 	
-	public DFA(Alfabet alfa, DFANode nodes, final String startState) {
+	public DFA(Alfabet alfa, final String startState, DFANode... nodes) {
 		_alfabet = alfa;
-		_nodes = (ArrayList<DFANode>)Arrays.asList(nodes);
+		_nodes = Arrays.asList(nodes);
 		_startState = startState;
 		
 	}
@@ -49,6 +60,10 @@ public class DFA implements IMethodAsString {
 		}
 		
 		return false;
+	}
+	
+	private void addMissingAlfabetCharacters() {
+		
 	}
 	
 	// Returns non-empty String if false
@@ -135,6 +150,32 @@ public class DFA implements IMethodAsString {
 			return (ArrayList<DFANode>)nodes;
 		}
 		return new ArrayList<DFANode>();
+	}
+	
+	public static DFA GenerateDFA(String matchString) {
+		if (matchString.length() > 25)
+			return null; // Can't handle letters above Z yet. Also need to reformat it for numbers later (q0, q1, q2, ...)
+		
+		// Add every new occuring character to a unique set
+		Set<String> alfabetCharacters = new LinkedHashSet<String>();
+		// Create all our nodes
+		ArrayList<DFANode> nodes = new ArrayList<DFANode>();
+		// Start node
+		DFANode lastDFA = new DFANode("S", false);
+		int counter = 0;
+		for(char[] c = matchString.toCharArray(); counter < c.length; counter++) {
+			// Add every new character to our alfabet
+			alfabetCharacters.add(Character.toString(c[counter]));
+			
+			if (counter + 1 != c.length)
+				lastDFA.addTransitions(new TransitionRule(Character.toString(c[counter]), Character.toString(65+counter)));
+			// Add node to list before create a new one
+			nodes.add(lastDFA);
+			// Create a node starting with symbol "A", end char is always end symbol
+			lastDFA = new DFANode(Character.toString(65+counter), counter + 1 == c.length);
+		}
+		
+		return new DFA(new Alfabet(alfabetCharacters.toArray(String[]::new)), "S", nodes.toArray(DFANode[]::new));
 	}
 	
 	
