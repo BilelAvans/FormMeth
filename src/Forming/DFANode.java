@@ -6,7 +6,7 @@ import java.util.Dictionary;
 import java.util.TreeMap;
 
 
-public class DFANode {
+public class DFANode implements Comparable {
 	
 	private String _state;
 	
@@ -60,11 +60,30 @@ public class DFANode {
 	
 	@Override
 	public boolean equals(Object ob) {
-		if (ob instanceof DFANode)
+		if (ob instanceof DFANode) {
 			return ((DFANode)ob)._state.equals(this._state);
+		}
+			
 		
 		return false;
 	}
+
+
+	@Override
+	public int compareTo(Object o) {
+		DFANode node = ((DFANode)o);
+		
+		if (node.get_state().equals("S") && this.get_state().equals("S"))
+			return 0;
+		else if (node.get_state().equals("S"))
+			return -1;
+		else if (this.get_state().equals("S"))
+			return 1;
+		
+		return node.get_state().compareTo(this.get_state());
+		
+	}
+	
 	
 	
 	

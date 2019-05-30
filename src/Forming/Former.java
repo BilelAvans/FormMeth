@@ -5,7 +5,7 @@ import Parsing.GraphwizExec;
 public class Former {
 	public static void main(String[] args) {
 		//generateNFA();
-		generateNFAFromString("abcdefg");
+		generateNFAFromString("abba");
 	}
 	
 	private static void testGrammar() {

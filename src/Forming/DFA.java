@@ -3,6 +3,8 @@ package Forming;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,8 @@ public class DFA implements IMethodAsString {
 	private	List<DFANode> _nodes = new ArrayList<DFANode>();
 
 	private final String _startState;
+	
+	private String matchString = "";
 	
 	// Create from Grammar
 	private DFA(Grammar grammar) {
@@ -50,6 +54,11 @@ public class DFA implements IMethodAsString {
 		_nodes = Arrays.asList(nodes);
 		_startState = startState;
 		
+		this.matchString = "abcdef";
+		
+		addMissingAlfabetCharacters();
+		
+		
 	}
 	
 	public boolean startAvailable() {
@@ -63,6 +72,65 @@ public class DFA implements IMethodAsString {
 	}
 	
 	private void addMissingAlfabetCharacters() {
+		
+		int counter = 0;
+		
+		String currentPath = "";
+		
+		this._nodes = this._nodes.stream().sorted((n1, n2) -> n1.compareTo(n2)).collect(Collectors.toList());
+		
+		for (DFANode node: this._nodes) {
+			for (String c: this._alfabet.getAllSigns()) {
+				System.out.println(c);
+				if (counter == 0) {
+					Optional<TransitionRule> rule = node.get_transitions().stream().filter(tr -> tr.getSign().equals(c)).findAny();
+					if (rule.isEmpty()) {
+						node.addTransitions(new TransitionRule(c, "S"));
+					} else {
+						currentPath += rule.get().getSign();
+					}
+				} else {
+					Optional<TransitionRule> rule = node.get_transitions().stream().filter(tr -> tr.getSign().equals(c)).findAny();
+					if (rule.isEmpty()) {
+						// Where must we go then?
+						String firstString = currentPath + c;
+						TransitionRule newRule = null;
+
+						for (int count = 0; count < counter; count++) {
+							// Match the strings
+							// Look for the biggest amount of chars in which the back of our new string compares to the front of the other. (Does this even make sense?)
+							String secondString = this.matchString.substring(0, count+1);
+							System.out.println("length - counter = "+ (firstString.length() - counter));
+							System.out.println(firstString.length() + 1);
+							String thirdString  = firstString.substring(firstString.length() - counter, firstString.length());
+							if (thirdString.equals(secondString)) {
+								newRule = new TransitionRule(c, Character.toString((char)'A'+counter-1));
+							}
+							
+						}
+						
+						if (newRule == null)
+							newRule = new TransitionRule(c, "S");
+						
+						node.addTransitions(newRule);
+						
+					} else {
+						currentPath += rule.get().getSign();
+					}
+				}
+				
+			}
+			counter++;
+		}
+		
+//		for (int counter = matchString.length(); counter > 0; counter-- ) {
+//			String str = new String(matchString, startingIndex, lastIndex + 1 - startingIndex);
+//			
+//			
+//			
+//			if ()
+//		}
+		
 		
 	}
 	
@@ -155,6 +223,7 @@ public class DFA implements IMethodAsString {
 	public static DFA GenerateDFA(String matchString) {
 		if (matchString.length() > 25)
 			return null; // Can't handle letters above Z yet. Also need to reformat it for numbers later (q0, q1, q2, ...)
+		
 		
 		// Add every new occuring character to a unique set
 		Set<String> alfabetCharacters = new LinkedHashSet<String>();
