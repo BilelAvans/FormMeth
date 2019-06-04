@@ -173,11 +173,22 @@ public class DFA implements IMethodAsString {
 		StringBuilder builder = new StringBuilder();
 		builder.append("digraph { \n");
 		
+		String endNodesString = "node [shape = doublecircle]; ";
+		String otherStr = "";
+		
 		for (DFANode node: _nodes) {
+			if (node.get_isEndSymbol())
+				endNodesString += String.valueOf(node.get_state()) +" ";
+				
 			for (TransitionRule<Integer> entry: node.get_transitions()) {
-				builder.append(node.get_state() +" -> "+ entry.getGoTo() +" [ label="+ "\""+ entry.getSign() +"\""  +", weigth=\"0.6\"]; \n");
+				otherStr += (node.get_state() +" -> "+ entry.getGoTo() +" [ label="+ "\""+ entry.getSign() +"\""  +", weigth=\"0.6\"]; \n");
 			}
 		}
+		
+		endNodesString += (";\n");
+		builder.append(endNodesString);
+		builder.append("node [shape = circle]; \n");
+		builder.append(otherStr);
 		
 		builder.append("}");
 		

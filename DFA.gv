@@ -1,12 +1,28 @@
 digraph { 
-0 -> 1 [ label="a", weigth="0.6"]; 
-0 -> 0 [ label="b", weigth="0.6"]; 
-1 -> 2 [ label="b", weigth="0.6"]; 
-1 -> 1 [ label="a", weigth="0.6"]; 
-2 -> 3 [ label="b", weigth="0.6"]; 
-2 -> 0 [ label="a", weigth="0.6"]; 
-3 -> 4 [ label="a", weigth="0.6"]; 
-3 -> 0 [ label="b", weigth="0.6"]; 
-4 -> 4 [ label="a", weigth="0.6"]; 
-4 -> 4 [ label="b", weigth="0.6"]; 
+node [shape = doublecircle]; 5 ;
+node [shape = circle]; 
+0 -> 1 [ label="h", weigth="0.6"]; 
+0 -> 0 [ label="e", weigth="0.6"]; 
+0 -> 0 [ label="l", weigth="0.6"]; 
+0 -> 0 [ label="o", weigth="0.6"]; 
+1 -> 2 [ label="e", weigth="0.6"]; 
+1 -> 1 [ label="h", weigth="0.6"]; 
+1 -> 0 [ label="l", weigth="0.6"]; 
+1 -> 0 [ label="o", weigth="0.6"]; 
+2 -> 3 [ label="l", weigth="0.6"]; 
+2 -> 0 [ label="h", weigth="0.6"]; 
+2 -> 0 [ label="e", weigth="0.6"]; 
+2 -> 0 [ label="o", weigth="0.6"]; 
+3 -> 4 [ label="l", weigth="0.6"]; 
+3 -> 0 [ label="h", weigth="0.6"]; 
+3 -> 0 [ label="e", weigth="0.6"]; 
+3 -> 0 [ label="o", weigth="0.6"]; 
+4 -> 5 [ label="o", weigth="0.6"]; 
+4 -> 0 [ label="h", weigth="0.6"]; 
+4 -> 0 [ label="e", weigth="0.6"]; 
+4 -> 0 [ label="l", weigth="0.6"]; 
+5 -> 5 [ label="h", weigth="0.6"]; 
+5 -> 5 [ label="e", weigth="0.6"]; 
+5 -> 5 [ label="l", weigth="0.6"]; 
+5 -> 5 [ label="o", weigth="0.6"]; 
 }

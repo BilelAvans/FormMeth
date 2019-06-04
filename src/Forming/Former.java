@@ -5,7 +5,7 @@ import Parsing.GraphwizExec;
 public class Former {
 	public static void main(String[] args) {
 		//generateNFA();
-		generateNFAFromString("abba");
+		generateNFAFromString("hello");
 		//DFA dfa = DFA.fromGraphVizStringToDFA(GraphwizExec.loadTextFile("DFA.gv"));
 		//GraphwizExec.openDotExeCodeString(dfa);
 	}
