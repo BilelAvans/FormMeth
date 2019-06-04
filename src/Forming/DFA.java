@@ -1,10 +1,9 @@
 package Forming;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -20,97 +19,86 @@ public class DFA implements IMethodAsString {
 	
 	private	List<DFANode> _nodes = new ArrayList<DFANode>();
 
-	private final String _startState;
+	private final int _startState;
 	
 	private String matchString = "";
 	
+	
 	// Create from Grammar
+	@SuppressWarnings("unchecked")
 	private DFA(Grammar grammar) {
 		
 		this._alfabet = grammar.get_alfabet();
-		this._startState = grammar.get_startSymbol();
+		this._startState = Integer.parseInt(grammar.get_startSymbol());
 
-		for (ProductionRule tr: grammar.get_rules()) {
+		for (ProductionRule<String> pr: grammar.get_rules()) {
+						
+			ArrayList<TransitionRule<Integer>> trRules = new ArrayList<TransitionRule<Integer>>();
 			
-			_nodes.add(new DFANode(tr.getFrom(), tr.isEndState(), (TransitionRule[])tr.getTransitions().toArray()));
+			for (TransitionRule<String> tr: pr.getTransitions()) {
+				trRules.add(new TransitionRule<Integer>(tr.getSign(), Integer.valueOf(tr.getGoTo())));
+			}
+			
+			_nodes.add(new DFANode((char)pr.getFrom().toCharArray()[0], pr.isEndState(), trRules.toArray(new TransitionRule[0])));
 
 		}
 	}
 	
-	// Test case
-	public DFA(Alfabet alfa) {
-		_alfabet = alfa;
-		
-		_startState = "S";
-		
-		_nodes.add(new DFANode("S", false, 	new TransitionRule("a", "A"),
-											new TransitionRule("b", "A")));
-		_nodes.add(new DFANode("A", true, 	new TransitionRule("a", "A"),
-											new TransitionRule("b", "A")));
-	}
 	
-	public DFA(Alfabet alfa, final String startState, DFANode... nodes) {
+	public DFA(Alfabet alfa, int startState, DFANode... nodes) {
 		_alfabet = alfa;
 		_nodes = Arrays.asList(nodes);
 		_startState = startState;
 		
-		this.matchString = "abcdef";
-		
-		addMissingAlfabetCharacters();
-		
-		
 	}
 	
+
 	public boolean startAvailable() {
-		if (!_startState.isEmpty()) {
-			Optional<DFANode> node = _nodes.stream().filter((DFANode n) -> n.get_state().equals(_startState)).findAny();
-			
-			return (!node.isEmpty());
-		}
+			// Check if node with "S" exists
+		return !(_nodes.stream().filter((DFANode n) -> n.get_state() == this._startState).findAny().isEmpty());
 		
-		return false;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void addMissingAlfabetCharacters() {
 		
 		int counter = 0;
-		
+	
 		String currentPath = "";
 		
 		this._nodes = this._nodes.stream().sorted((n1, n2) -> n1.compareTo(n2)).collect(Collectors.toList());
 		
 		for (DFANode node: this._nodes) {
+			
 			for (String c: this._alfabet.getAllSigns()) {
-				System.out.println(c);
 				if (counter == 0) {
-					Optional<TransitionRule> rule = node.get_transitions().stream().filter(tr -> tr.getSign().equals(c)).findAny();
+					Optional<TransitionRule<Integer>> rule = node.get_transitions().stream().filter(tr -> tr.getSign().equals(c)).findAny();
 					if (rule.isEmpty()) {
-						node.addTransitions(new TransitionRule(c, "S"));
+						node.addTransitions(new TransitionRule<Integer>(c, 0));
 					} else {
 						currentPath += rule.get().getSign();
 					}
 				} else {
-					Optional<TransitionRule> rule = node.get_transitions().stream().filter(tr -> tr.getSign().equals(c)).findAny();
+					Optional<TransitionRule<Integer>> rule = node.get_transitions().stream().filter(tr -> tr.getSign().equals(c)).findAny();
 					if (rule.isEmpty()) {
 						// Where must we go then?
 						String firstString = currentPath + c;
-						TransitionRule newRule = null;
+						TransitionRule<Integer> newRule = null;
 
 						for (int count = 0; count < counter; count++) {
 							// Match the strings
 							// Look for the biggest amount of chars in which the back of our new string compares to the front of the other. (Does this even make sense?)
 							String secondString = this.matchString.substring(0, count+1);
-							System.out.println("length - counter = "+ (firstString.length() - counter));
-							System.out.println(firstString.length() + 1);
 							String thirdString  = firstString.substring(firstString.length() - counter, firstString.length());
 							if (thirdString.equals(secondString)) {
-								newRule = new TransitionRule(c, Character.toString((char)'A'+counter-1));
+								newRule = new TransitionRule<Integer>(c, counter);
 							}
-							
 						}
 						
-						if (newRule == null)
-							newRule = new TransitionRule(c, "S");
+						if (node.get_isEndSymbol())
+							newRule = new TransitionRule<Integer>(c, counter);
+						else if (newRule == null)
+							newRule = new TransitionRule<Integer>(c, 0);
 						
 						node.addTransitions(newRule);
 						
@@ -121,16 +109,7 @@ public class DFA implements IMethodAsString {
 				
 			}
 			counter++;
-		}
-		
-//		for (int counter = matchString.length(); counter > 0; counter-- ) {
-//			String str = new String(matchString, startingIndex, lastIndex + 1 - startingIndex);
-//			
-//			
-//			
-//			if ()
-//		}
-		
+		}		
 		
 	}
 	
@@ -141,7 +120,7 @@ public class DFA implements IMethodAsString {
 		for (DFANode node: _nodes) {
 			for (final String sign: _alfabet.getAllSigns()) {
 				// Find transition with sign
-				Optional<TransitionRule> transition = node.get_transitions().stream().filter((TransitionRule rule) -> rule.hasSign(sign)).findAny();
+				Optional<TransitionRule<Integer>> transition = node.get_transitions().stream().filter((TransitionRule<Integer> rule) -> rule.hasSign(sign)).findAny();
 				// Return false if it's not available
 				if (transition.isEmpty()) {
 					errorString += ("\n Symbol "+ sign +" not found in node: "+ node.get_state());
@@ -173,7 +152,7 @@ public class DFA implements IMethodAsString {
 			final char c = content.charAt(counter);
 			
 			// Where to go? Read from TransitionRule
-			Optional<TransitionRule> rule = node.get().get_transitions().stream().filter((TransitionRule tr) -> tr.getSign().equals(Character.toString(c))).findAny();
+			Optional<TransitionRule<Integer>> rule = node.get().get_transitions().stream().filter((TransitionRule<Integer> tr) -> tr.getSign().equals(Character.toString(c))).findAny();
 
 			if (rule.isEmpty())
 				return false;
@@ -192,11 +171,11 @@ public class DFA implements IMethodAsString {
 	public String getMethodAsGraphVizString() {
 		
 		StringBuilder builder = new StringBuilder();
-		builder.append("digraph { ");
+		builder.append("digraph { \n");
 		
 		for (DFANode node: _nodes) {
-			for (TransitionRule entry: node.get_transitions()) {
-				builder.append(node.get_state() +" -> "+ entry.getGoTo() +" [ label="+ "\""+ entry.getSign() +"\""  +", weigth=\"0.6\"];");
+			for (TransitionRule<Integer> entry: node.get_transitions()) {
+				builder.append(node.get_state() +" -> "+ entry.getGoTo() +" [ label="+ "\""+ entry.getSign() +"\""  +", weigth=\"0.6\"]; \n");
 			}
 		}
 		
@@ -220,32 +199,201 @@ public class DFA implements IMethodAsString {
 		return new ArrayList<DFANode>();
 	}
 	
+	
+	
+	public String getMatchString() {
+		return matchString;
+	}
+
+
+	public void setMatchString(String matchString) {
+		this.matchString = matchString;
+	}
+
+
+	@SuppressWarnings("unchecked")
 	public static DFA GenerateDFA(String matchString) {
 		if (matchString.length() > 25)
 			return null; // Can't handle letters above Z yet. Also need to reformat it for numbers later (q0, q1, q2, ...)
-		
-		
+				
 		// Add every new occuring character to a unique set
 		Set<String> alfabetCharacters = new LinkedHashSet<String>();
 		// Create all our nodes
 		ArrayList<DFANode> nodes = new ArrayList<DFANode>();
 		// Start node
-		DFANode lastDFA = new DFANode("S", false);
-		int counter = 0;
-		for(char[] c = matchString.toCharArray(); counter < c.length; counter++) {
+		DFANode lastDFA = new DFANode(0, false);
+		int counter = 1;
+		for(char[] c = matchString.toCharArray(); counter <= c.length; counter++) {
+			System.out.println(c[counter-1]);
 			// Add every new character to our alfabet
-			alfabetCharacters.add(Character.toString(c[counter]));
+			alfabetCharacters.add(Character.toString(c[counter-1]));
 			
-			if (counter + 1 != c.length)
-				lastDFA.addTransitions(new TransitionRule(Character.toString(c[counter]), Character.toString(65+counter)));
+			lastDFA.addTransitions(new TransitionRule<Integer>(Character.toString(c[counter-1]), counter));
+			
 			// Add node to list before create a new one
 			nodes.add(lastDFA);
 			// Create a node starting with symbol "A", end char is always end symbol
-			lastDFA = new DFANode(Character.toString(65+counter), counter + 1 == c.length);
+			lastDFA = new DFANode(counter, counter == c.length);
+			
 		}
 		
-		return new DFA(new Alfabet(alfabetCharacters.toArray(String[]::new)), "S", nodes.toArray(DFANode[]::new));
+
+		nodes.add(lastDFA);
+		
+		DFA dfa = new DFA(new Alfabet(alfabetCharacters.toArray(String[]::new)), 0, nodes.toArray(DFANode[]::new));
+		dfa.setMatchString(matchString);
+		dfa.addMissingAlfabetCharacters();
+		
+		return dfa;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static DFA fromGraphVizStringToDFA(String string) {
+		
+		String[] splitString = string.split("\n");
+		
+		// Add every new occuring character to a unique set
+		Set<String> alfabetCharacters = new LinkedHashSet<String>();
+		// Create all our nodes
+		ArrayList<DFANode> nodes = new ArrayList<DFANode>();
+		
+		for (int counter = 1; counter < splitString.length - 2; counter++) {
+			String stringPart = splitString[counter];
+			// C -> S [ label="a", weigth="0.6"];
+			Optional<DFANode> node = nodes.stream().filter(nd -> String.valueOf(nd.get_state()).equals(stringPart.charAt(0))).findAny();
+			
+			if (node.isEmpty()) {
+				node = Optional.of((new DFANode(Integer.valueOf(stringPart.charAt(0)), true)));
+				nodes.add(node.get());
+			}
+			// Add transition label to alfabet
+			alfabetCharacters.add(stringPart.split("\"")[1]);
+			
+			
+						
+			node.get().addTransitions(new TransitionRule<Integer>(stringPart.split("\"")[1], Integer.valueOf(stringPart.split("->")[1])));
+			nodes.add(node.get());
+		}
+		
+		
+		return new DFA(new Alfabet(alfabetCharacters.toArray(String[]::new)), 0, nodes.toArray(DFANode[]::new));
+		
+	}	
+	
+	public DFA addDFA(DFA other) {
+		return null;
 	}
 	
+	public DFA Denial() {
+		
+		for (DFANode node: this._nodes) {
+			node.set_isEndSymbol(!node.get_isEndSymbol());
+		}
+		
+		return this;
+		
+	}
+	
+//	public DFA reverse() {
+//		for (DFANode node: this._nodes) {
+//			
+//			if (node.get_state().equals(this._startState))
+//				node.set_isEndSymbol(true);
+//			else if (node.get_isEndSymbol()){
+//				this._startStates = node.get_state();
+//			}
+//			
+//			// Switch TransitionRules
+//			for (TransitionRule tR: node.get_transitions()) {
+//				Optional<DFANode> otherNode = this._nodes.stream().filter(r -> r.get_state().equals());
+//				
+//				if (!otherNode.isEmpty()) {
+//					
+//				}
+//			}
+//			
+//		}
+//	}
+	
+//	public DFA minimize() {
+//		// Create our groups
+//		// All non-ending states		
+//		Map<Integer, ArrayList<DFANode>> startNodes = new HashMap<Integer, ArrayList<DFANode>>();
+//		// End states
+//		Map<Integer, ArrayList<DFANode>> endNodes = new HashMap<Integer, ArrayList<DFANode>>();
+//		
+//		Integer currentNumber = 0;
+//		int numOfNonEnds = 1;
+//		int numOfEnds = 1;
+//		
+//		startNodes.put(currentNumber, new ArrayList<DFANode>());
+//		currentNumber = currentNumber++;
+//		startNodes.put(currentNumber, new ArrayList<DFANode>());
+//		currentNumber++;
+//		
+//		
+//		for (DFANode node: this._nodes) {
+//			if (node.get_isEndSymbol())
+//				endNodes.get(1).add(node);
+//			else
+//				startNodes.get(0).add(node);
+//		}
+//		
+//		// Create table of states
+//		
+//		
+//		
+//		// Divide in subgroups if not all nodes from same group enter same node
+//			
+//
+//		
+//		
+//		return null;
+//	}
+//	
+//	public static void splitInGroups(int startState, Map<Integer, ArrayList<DFANode>> groupStates, int currentNumber){
+//		Set<String> uniqueStuff = new LinkedHashSet<>();
+//		
+//		// Start states
+//		for (Map.Entry<Integer, ArrayList<DFANode>> entry : groupStates.entrySet()) {
+//			for (DFANode node: entry.getValue()) {
+//				for (TransitionRule tR: node.get_transitions()) {
+//					uniqueStuff.add(node.get_state()+tR.getGoTo());	
+//				}							
+//			}
+//		}
+//		// Only 1 unique entry, our list can't be minimized further
+//		if (uniqueStuff.size() == 1) {
+//			return;
+//		}
+//		else {
+//			// Create new states
+//			int newNumberOfGroups = uniqueStuff.size();
+//			for (int counter = currentNumber; counter < newNumberOfGroups + currentNumber; counter++) {
+//				groupStates.put(counter, new ArrayList<DFANode>());
+//			
+//			}
+//			
+//			// Transfer states and assign new state name
+//			for (Map.Entry<Integer, ArrayList<DFANode>> entry : groupStates.entrySet()) {
+//				for (DFANode node: entry.getValue()) {
+//					for (TransitionRule tR: node.get_transitions()) {
+//						String newState = 'A' + currentNumber + uniqueStuff.stream().collect(Collectors.toList()).indexOf(new DFANode(node.get_state()+tR.getGoTo()));
+//						DFANode newNode = new DFANode()
+//					}							
+//				}
+//			}
+//			
+//			
+//			// Remove old states
+//			for (int newNumber = newNumberOfGroups + currentNumber;; currentNumber < newNumber; currentNumber++) {
+//				groupStates.remove(currentNumber);
+//			}
+//			currentNumber = 
+//			
+//		}
+//		
+//		
+//	}
 	
 }

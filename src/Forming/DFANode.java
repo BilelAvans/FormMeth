@@ -1,20 +1,23 @@
 package Forming;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.TreeMap;
 
 
-public class DFANode implements Comparable {
+public class DFANode implements Comparable<DFANode> {
 	
-	private String _state;
+	private int _state;
 	
-	private ArrayList<TransitionRule> _transitions = new ArrayList<>();
+	private ArrayList<TransitionRule<Integer>> _transitions = new ArrayList<>();
 	
 	private boolean _isEndSymbol;
 	
-	public DFANode(String _stateName, boolean isEndSymbol, TransitionRule... transitions) {
+	public DFANode(int state, ArrayList<TransitionRule<Integer>> tr, boolean _isEndSymbol) {
+		this._state = state;
+		
+	}
+	
+	@SafeVarargs
+	public DFANode(int _stateName, boolean isEndSymbol, TransitionRule<Integer>... transitions) {
 		
 		this._state = _stateName;
 		this._isEndSymbol = isEndSymbol;
@@ -23,28 +26,29 @@ public class DFANode implements Comparable {
 	}
 
 
-	public String get_state() {
+	public int get_state() { 
 		return _state;
 	}
 
 
-	public void set_state(String _state) {
+	public void set_state(int _state) {
 		this._state = _state;
 	}
 
 
-	public ArrayList<TransitionRule> get_transitions() {
+	public ArrayList<TransitionRule<Integer>> get_transitions() {
 		return _transitions;
 	}
 	
-	public void addTransitions(TransitionRule... transitions) {
-		for(TransitionRule transition: transitions) {
+	@SuppressWarnings("unchecked")
+	public void addTransitions(TransitionRule<Integer>... transitions) {
+		for(TransitionRule<Integer> transition: transitions) {
 			_transitions.add(transition);
 		}
 	}
 
 
-	public void set_transitions(ArrayList<TransitionRule> _transitions) {
+	public void set_transitions(ArrayList<TransitionRule<Integer>> _transitions) {
 		this._transitions = _transitions;
 	}
 
@@ -61,28 +65,20 @@ public class DFANode implements Comparable {
 	@Override
 	public boolean equals(Object ob) {
 		if (ob instanceof DFANode) {
-			return ((DFANode)ob)._state.equals(this._state);
+			return ((DFANode)ob)._state == this._state;
 		}
 			
-		
 		return false;
 	}
 
 
 	@Override
-	public int compareTo(Object o) {
-		DFANode node = ((DFANode)o);
+	public int compareTo(DFANode node) {		
 		
-		if (node.get_state().equals("S") && this.get_state().equals("S"))
-			return 0;
-		else if (node.get_state().equals("S"))
-			return -1;
-		else if (this.get_state().equals("S"))
-			return 1;
-		
-		return node.get_state().compareTo(this.get_state());
+		return Integer.valueOf((this._state)).compareTo(Integer.valueOf(node.get_state()));
 		
 	}
+	
 	
 	
 	

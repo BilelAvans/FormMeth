@@ -1,13 +1,13 @@
 package Forming;
 
-public class TransitionRule {
+public class TransitionRule<T> {
 
 	// Sign from our alfabet.
 	private String _sign;
 	// Where will it lead
-	private String _goTo;
+	private T _goTo;
 	
-	public TransitionRule(String sign, String goTo) {
+	public TransitionRule(String sign, T goTo) {
 		this._sign = sign;
 		this._goTo = goTo;
 	}
@@ -20,7 +20,7 @@ public class TransitionRule {
 
 
 
-	public String getGoTo() {
+	public T getGoTo() {
 		return _goTo;
 	}
 	
@@ -28,7 +28,7 @@ public class TransitionRule {
 		return _sign == sign;
 	}
 
-	public boolean hasGoTo(String goTo) {
+	public boolean hasGoTo(T goTo) {
 		return _goTo == goTo;
 	}
 

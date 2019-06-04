@@ -6,18 +6,21 @@ public class Former {
 	public static void main(String[] args) {
 		//generateNFA();
 		generateNFAFromString("abba");
+		//DFA dfa = DFA.fromGraphVizStringToDFA(GraphwizExec.loadTextFile("DFA.gv"));
+		//GraphwizExec.openDotExeCodeString(dfa);
 	}
 	
+	@SuppressWarnings({"unchecked"})
 	private static void testGrammar() {
-		ProductionRule pr = new ProductionRule("S", false, new TransitionRule("a", "A"), new TransitionRule("b", "A"));
+		ProductionRule<String> pr = new ProductionRule<String>("S", false, new TransitionRule<String>("a", "A"), new TransitionRule<String>("b", "A"));
 		
-		ProductionRule pr2 = new ProductionRule("A", true, new TransitionRule("b", "B"));
+		ProductionRule<String> pr2 = new ProductionRule<String>("A", true, new TransitionRule<String>("b", "B"));
 		
-		ProductionRule pr3 = new ProductionRule("B", true, new TransitionRule("b", "C"));
+		ProductionRule<String> pr3 = new ProductionRule<String>("B", true, new TransitionRule<String>("b", "C"));
 		
-		ProductionRule pr4 = new ProductionRule("C", true, new TransitionRule("a", "D"));
+		ProductionRule<String> pr4 = new ProductionRule<String>("C", true, new TransitionRule<String>("a", "D"));
 		
-		ProductionRule pr5 = new ProductionRule("D", true, new TransitionRule[] { });
+		ProductionRule<String> pr5 = new ProductionRule<String>("D", true, ((TransitionRule<String>[])new TransitionRule[0]));
 		
 		Grammar grammar = new Grammar(new Alfabet("a","b"), "S", pr, pr2, pr3, pr4, pr5);
 	
@@ -30,28 +33,12 @@ public class Former {
 		System.out.println("Valid: "+ grammar.isValidString("ababba", true));
 	}
 	
-	private static void generateNFA() {
-		GraphwizExec graph = new GraphwizExec();
-		Alfabet alfabet = new Alfabet("a", "b");
-		DFA dfa = new DFA(alfabet);
-		System.out.println("DFA correct: "+ (dfa.everyNodeHasEverySymbol() == ""));
-		
-		System.out.println("Valid string: "+ dfa.isValidString("a"));
-		
-		System.out.println("Valid string: "+ dfa.isValidString("aaaaaaaaabaaa"));
-		
-		boolean thisWorks = graph.openDotExeCodeString(dfa);
-		
-	}
-	
 	private static void generateNFAFromString(String matchingString) {
-		GraphwizExec graph = new GraphwizExec();
-		
 		DFA dfa = DFA.GenerateDFA(matchingString);
 		
-		System.out.println("Valid string: "+ dfa.isValidString("aaaaaaaaabaaa"));
+		System.out.println("Valid string: "+ dfa.isValidString("ababba"));
 		
-		boolean thisWorks = graph.openDotExeCodeString(dfa);
+		boolean thisWorks = GraphwizExec.openDotExeCodeString(dfa);
 		
 	}
 }

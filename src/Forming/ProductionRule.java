@@ -3,28 +3,29 @@ package Forming;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ProductionRule {
+public class ProductionRule<T> {
 	
-	private String _from;
+	private T _from;
 	
-	private ArrayList<TransitionRule> _rules = new ArrayList<>();
+	private ArrayList<TransitionRule<T>> _rules = new ArrayList<>();
 	
 	// Can this be an end state?
 	private boolean _isEnd;
 	
-	public ProductionRule(String _from, boolean isEndState, TransitionRule... tRules) {
+	@SafeVarargs
+	public ProductionRule(T _from, boolean isEndState, TransitionRule<T>... tRules) {
 		this._from = _from;
 		this._isEnd = isEndState;
-		this._rules = new ArrayList<TransitionRule>(Arrays.asList(tRules));
+		this._rules = new ArrayList<TransitionRule<T>>(Arrays.asList(tRules));
 	}
 	
 	
 	
-	public String getFrom() {
+	public T getFrom() {
 		return _from;
 	}
 
-	public ArrayList<TransitionRule> getTransitions() {
+	public ArrayList<TransitionRule<T>> getTransitions() {
 		return this._rules;
 	}
 

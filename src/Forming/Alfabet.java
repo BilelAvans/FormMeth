@@ -19,4 +19,9 @@ public class Alfabet {
 	public String[] getAllSigns() {
 		return this._allSigns;
 	}
+
+	public void setAllSigns(String[] allSigns) {
+		this._allSigns = allSigns;
+		
+	}
 }

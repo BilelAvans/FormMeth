@@ -1,1 +1,12 @@
-digraph { C -> S [ label="a", weigth="0.6"];C -> S [ label="b", weigth="0.6"];B -> C [ label="b", weigth="0.6"];B -> A [ label="a", weigth="0.6"];A -> B [ label="b", weigth="0.6"];A -> S [ label="a", weigth="0.6"];S -> A [ label="a", weigth="0.6"];S -> S [ label="b", weigth="0.6"];}
+digraph { 
+0 -> 1 [ label="a", weigth="0.6"]; 
+0 -> 0 [ label="b", weigth="0.6"]; 
+1 -> 2 [ label="b", weigth="0.6"]; 
+1 -> 1 [ label="a", weigth="0.6"]; 
+2 -> 3 [ label="b", weigth="0.6"]; 
+2 -> 0 [ label="a", weigth="0.6"]; 
+3 -> 4 [ label="a", weigth="0.6"]; 
+3 -> 0 [ label="b", weigth="0.6"]; 
+4 -> 4 [ label="a", weigth="0.6"]; 
+4 -> 4 [ label="b", weigth="0.6"]; 
+}
