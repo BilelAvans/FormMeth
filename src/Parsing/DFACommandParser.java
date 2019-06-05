@@ -1,12 +1,13 @@
 package Parsing;
 
 import Forming.DFA;
+import Forming.NDFA;
 
 public class DFACommandParser {
 
 	public static DFA ParseMultiString(String str) {
 		if (str.length() == 0)
-			return DFA.Empty();
+			return (DFA)DFA.Empty();
 		
 		DFA currentDFA = DFA.GenerateDFA(str);
 		

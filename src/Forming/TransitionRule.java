@@ -1,6 +1,7 @@
 package Forming;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class TransitionRule<T> implements Serializable {
 
@@ -13,8 +14,6 @@ public class TransitionRule<T> implements Serializable {
 		this._sign = sign;
 		this._goTo = goTo;
 	}
-	
-	
 	
 	public String getSign() {
 		return _sign;
@@ -34,11 +33,9 @@ public class TransitionRule<T> implements Serializable {
 		return _goTo == goTo;
 	}
 
-	@Override
-	public String toString() {
-		return "";
-//		return _isEnd ? _sign + " -> " + _sign + _goTo + " | "+ _sign : 
-//						_sign + " -> " + _sign + _goTo;
+	public String toProductionRuleString(ArrayList<T> endSigns) {
+		return endSigns.contains(_goTo) ? _sign + " -> " + _sign + _goTo + " | "+ _sign + " " : 
+											_sign + " -> " + _sign + _goTo + " ";
 	}
 
 

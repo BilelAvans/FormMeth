@@ -4,46 +4,56 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ProductionRule<T> implements Serializable {
+
+public class ProductionRule implements Serializable {
 	
-	private T _from;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2131980293807351290L;
+
+	private String _from;
 	
-	private ArrayList<TransitionRule<T>> _rules = new ArrayList<>();
+	private ArrayList<TransitionRule<String>> _rules = new ArrayList<>();
 	
 	// Can this be an end state?
 	private boolean _isEnd;
 	
 	@SafeVarargs
-	public ProductionRule(T _from, boolean isEndState, TransitionRule<T>... tRules) {
+	public ProductionRule(String _from, boolean isEndState, TransitionRule<String>... tRules) {
 		this._from = _from;
 		this._isEnd = isEndState;
-		this._rules = new ArrayList<TransitionRule<T>>(Arrays.asList(tRules));
+		this._rules = new ArrayList<TransitionRule<String>>(Arrays.asList(tRules));
 	}
 	
-	
-	
-	public T getFrom() {
+	public String getFrom() {
 		return _from;
 	}
 
-	public ArrayList<TransitionRule<T>> getTransitions() {
+	public ArrayList<TransitionRule<String>> getTransitions() {
 		return this._rules;
 	}
-
-	@Override
-	public String toString() {
-		
-		return "";
-		
-	}
-
 
 
 	public boolean isEndState() {
 		return this._isEnd;
 	}
-	
-	
-	
+
+	public void addTransitionRule(TransitionRule<String> transitionRule) {
+		this._rules.add(transitionRule);
+		
+	}
+
+	public String toProductionRuleString(String[] endStates) {
+		// TODO Auto-generated method stub
+		StringBuilder str = new StringBuilder();
+		for (TransitionRule<String> rule: _rules) {
+			
+			var list = new ArrayList<String>(Arrays.asList(endStates));
+			str.append(rule.toProductionRuleString(list)+"\n");
+		}
+		
+		return str.toString();
+	}
 	
 }

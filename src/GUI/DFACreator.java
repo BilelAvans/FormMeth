@@ -8,7 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
-import Forming.DFA;
+import Forming.NDFA;
 import Parsing.DFACommandParser;
 import Parsing.FileStorage;
 import Parsing.GraphwizExec;
@@ -39,7 +39,7 @@ public class DFACreator {
 	
 	private int _lastSelection;
 	
-	private DFA _lastDFA;
+	private NDFA _lastDFA;
 
 	/**
 	 * Launch the application.
@@ -114,7 +114,7 @@ public class DFACreator {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				// Remove old image
-				DFA dfa = DFACommandParser.ParseMultiString(matchStringTextField.getText());
+				NDFA dfa = DFACommandParser.ParseMultiString(matchStringTextField.getText());
 				
 				String dfaName = nameDFATextField.getText();
 				dfa.setMethodName(dfaName);
@@ -281,7 +281,7 @@ public class DFACreator {
 		if (dfaName.length() < 1)
 			return;
 		
-		DFA dfa = DFA.fromGraphVizStringToDFA(FileStorage.loadTextFile(dfaName), dfaName.replace(".gv", ".jpg"));
+		NDFA dfa = NDFA.fromGraphVizStringToDFA(FileStorage.loadTextFile(dfaName), dfaName.replace(".gv", ".jpg"));
 		
 		
 		// Create new image
