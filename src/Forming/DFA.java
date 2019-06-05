@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import Parsing.ArrayUtils;
 import Parsing.IMethodAsString;
 
 public class DFA implements IMethodAsString, Serializable {
@@ -23,6 +24,9 @@ public class DFA implements IMethodAsString, Serializable {
 	private final int _startState;
 
 	private String matchString = "";
+	
+	// For display and saving purpouses
+	private String _name;
 
 	// Create from Grammar
 	@SuppressWarnings("unchecked")
@@ -202,7 +206,7 @@ public class DFA implements IMethodAsString, Serializable {
 
 	@Override
 	public String getMethodName() {
-		return "DFA.gv";
+		return this._name;
 	}
 
 	public ArrayList<DFANode> getEndStates() {
@@ -257,9 +261,19 @@ public class DFA implements IMethodAsString, Serializable {
 
 		return dfa;
 	}
+	
+	private DFA() {
+		this._startState = 0;
+		this._alfabet = new Alfabet();
+	}
+	
+	
+	public static DFA Empty() {
+		return new DFA();
+	}
 
 	@SuppressWarnings("unchecked")
-	public static DFA fromGraphVizStringToDFA(String string) {
+	public static DFA fromGraphVizStringToDFA(String string, String dfaName) {
 
 		String[] splitString = string.split("\n");
 
@@ -286,18 +300,25 @@ public class DFA implements IMethodAsString, Serializable {
 			nodes.add(node.get());
 		}
 
-		return new DFA(new Alfabet(alfabetCharacters.toArray(String[]::new)), 0, nodes.toArray(DFANode[]::new));
-
+		DFA dfa = new DFA(new Alfabet(alfabetCharacters.toArray(String[]::new)), 0, nodes.toArray(DFANode[]::new));
+		dfa.setMethodName(dfaName);
+		return dfa;
+	}
+	
+	public void set_alfabet(Alfabet a) {
+		this._alfabet = a;
 	}
 
 	public DFA addDFA(DFA other) {
 //		if (!other._alfabet.equals(this._alfabet))
 //			return null;
 
-		Alfabet alfabet = new Cloon<Alfabet>(this._alfabet).get_ob();
-
+		Alfabet alfabet = new Alfabet(ArrayUtils.combine(this._alfabet.getAllSigns(), other.get_alfabet().getAllSigns()));
+        
 		DFA otherDFA = new Cloon<DFA>(other).get_ob();
+		otherDFA.set_alfabet(alfabet);
 		otherDFA.incStatesBy(this.get_nodes().size());
+		this._alfabet = alfabet;
 		// new array of size * size elements
 		ArrayList<DFANode> nodes = new ArrayList<>(otherDFA.get_nodes().size() * this.get_nodes().size());
 		ArrayList<TransitionRule<Integer>> rules = new ArrayList<>();
@@ -318,22 +339,18 @@ public class DFA implements IMethodAsString, Serializable {
 			}
 
 		}
-//		
-//		int[] counter = { 0 };
-//		for (; counter[0] < otherDFA.get_nodes().size() * this.get_nodes().size() * alfabet.getAllSigns().length; counter[0]++) {
-//			System.out.println(counter[0]);
-//			Optional<TransitionRule<Integer>> = nodes.stream().filter(nd -> nd.get_state() == counter[0]).findAny();
-//			
-//			if ()
-//		}
 	
 
 		DFA dfa = new DFA(alfabet, 0, nodes.toArray(new DFANode[nodes.size()]));
 		return dfa;
 	}
 
+	private Alfabet get_alfabet() {
+		// TODO Auto-generated method stub
+		return this._alfabet;
+	}
+
 	public void incStatesBy(int size) {
-		System.out.println("Size: "+ size);
 		for (DFANode node: this._nodes) {
 			node.set_state(node.get_state() + size);
 			for (TransitionRule<Integer> tr: node.get_transitions()) {
@@ -359,6 +376,11 @@ public class DFA implements IMethodAsString, Serializable {
 		return this;
 
 	}
+	public void setMethodName(String _name) {
+		this._name = _name;
+	}
+	
+	
 
 //	public DFA reverse() {
 //		for (DFANode node: this._nodes) {

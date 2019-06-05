@@ -10,54 +10,21 @@ import java.io.PrintWriter;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 public class GraphwizExec {
 	
-	public static boolean saveTextFile(String filename, String content) {
-		File file = new File(System.getProperty("user.dir") + "/"+filename);
-		
-		try {
-			PrintWriter writer = new PrintWriter(file);
-			writer.write(content);
-			writer.close();
-			
-		} catch (FileNotFoundException fEx) {
-			return false;
-		}
-		
-		return true;
-	}
-	
-	public static String loadTextFile(String filename) {
-		
-		try {
-			File file = new File(System.getProperty("user.dir") + "/"+filename);
-			BufferedReader fr = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-			String line = "";
-			while(fr.ready()) {
-				line += fr.readLine();
-			}
-			fr.close();
-			System.out.println(line);
-			
-			return line;
-			
-		} catch (FileNotFoundException fEx) {
-			return "";
-		} catch (IOException ioEx) {
-			return "";
-		}
-	}
-	
 	public static boolean openDotExeCodeString(IMethodAsString method) {
-		System.out.println("Here: "+ method.getMethodAsGraphVizString());
+		String fullGvName = System.getProperty("user.dir")+"\\Storage\\JPEG\\" +method.getMethodName()+".jpg";
+		String fullJpegName = System.getProperty("user.dir")+"\\Storage\\JPEG\\" +method.getMethodName()+".jpg";
+		
 		// Save our string as a file first
-		if (saveTextFile(method.getMethodName(), method.getMethodAsGraphVizString())) {
+		if (FileStorage.saveTextFile(method.getMethodName(), method.getMethodAsGraphVizString())) {
 			try {
 				// Call the file and create a 'jpg'
-				Process process = new ProcessBuilder("C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe","-Tjpeg", method.getMethodName(),"-o","graph.jpg").start();
+				Process process = new ProcessBuilder("C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe","-Tjpeg", method.getMethodName(),"-o","/Storage/JPEG/" +method.getMethodName()+".jpg").start();
 				
-				new ImageDisplay(System.getProperty("user.dir") + "/graph.jpg");
+				new ImageDisplay(System.getProperty("user.dir") +"/Storage/JPEG/" +method.getMethodName()+".jpg");
 				
 				// Open the JPeg in your standard photo viewer
 				
@@ -72,15 +39,19 @@ public class GraphwizExec {
 		
 	}
 	
-	public static JLabel openDotExeCodePanel(IMethodAsString method) {
-		System.out.println("Here: "+ method.getMethodAsGraphVizString());
+	public static JLabel generateDFAJLabel(IMethodAsString method) {
+		String fullGvName = System.getProperty("user.dir")+"\\Storage\\JPEG\\" +method.getMethodName()+".gv";
+		String fullJpegName = System.getProperty("user.dir")+"\\Storage\\JPEG\\" +method.getMethodName()+".jpg";
+		
 		// Save our string as a file first
-		if (saveTextFile(method.getMethodName(), method.getMethodAsGraphVizString())) {
+		if (FileStorage.saveTextFile(method.getMethodName(), method.getMethodAsGraphVizString())) {
 			try {
-				// Call the file and create a 'jpg'
-				Process process = new ProcessBuilder("C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe","-Tjpeg", method.getMethodName(),"-o","graph.jpg").start();
 				
-				return ImageDisplay.GetJComponentFromFile(System.getProperty("user.dir") + "/graph.jpg");
+				
+				// Call the file and create a 'jpg'
+				Process process = new ProcessBuilder("C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe","-Tjpeg", fullGvName,"-o", fullJpegName).start();
+				
+				return ImageDisplay.GetJComponentFromFile(fullJpegName);
 				
 				// Open the JPeg in your standard photo viewer
 				
@@ -93,4 +64,16 @@ public class GraphwizExec {
 		return null;
 		
 	}
+	
+	public static JLabel loadDFAJLabel(IMethodAsString method) {
+		String fullJpegName = System.getProperty("user.dir")+"\\Storage\\JPEG\\" +method.getMethodName();
+		
+		return ImageDisplay.GetJComponentFromFile(fullJpegName);
+	
+	}
+	
+    public static void infoBox(String infoMessage, String titleBar)
+    {
+        JOptionPane.showMessageDialog(null, infoMessage, "InfoBox: " + titleBar, JOptionPane.INFORMATION_MESSAGE);
+    }
 }

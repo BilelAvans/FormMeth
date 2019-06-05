@@ -1,0 +1,24 @@
+digraph { 
+node [shape = doublecircle]; 4 ;
+node [shape = circle]; 
+0 -> 1 [ label="a", weigth="0.6"]; 
+0 -> 0 [ label="b", weigth="0.6"]; 
+0 -> 0 [ label="c", weigth="0.6"]; 
+0 -> 0 [ label="d", weigth="0.6"]; 
+1 -> 2 [ label="b", weigth="0.6"]; 
+1 -> 1 [ label="a", weigth="0.6"]; 
+1 -> 0 [ label="c", weigth="0.6"]; 
+1 -> 0 [ label="d", weigth="0.6"]; 
+2 -> 3 [ label="c", weigth="0.6"]; 
+2 -> 0 [ label="a", weigth="0.6"]; 
+2 -> 0 [ label="b", weigth="0.6"]; 
+2 -> 0 [ label="d", weigth="0.6"]; 
+3 -> 4 [ label="d", weigth="0.6"]; 
+3 -> 0 [ label="a", weigth="0.6"]; 
+3 -> 0 [ label="b", weigth="0.6"]; 
+3 -> 0 [ label="c", weigth="0.6"]; 
+4 -> 4 [ label="a", weigth="0.6"]; 
+4 -> 4 [ label="b", weigth="0.6"]; 
+4 -> 4 [ label="c", weigth="0.6"]; 
+4 -> 4 [ label="d", weigth="0.6"]; 
+}
