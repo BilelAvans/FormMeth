@@ -44,4 +44,27 @@ public class ImageDisplay {
 	      }
 	    });
 	}
+	
+	public static JLabel GetJComponentFromFile(String name) {
+		System.out.println(name);
+        
+        BufferedImage image = null;
+        try
+        {
+          image = ImageIO.read(new File(name));
+        }
+        catch (IOException e)
+        {
+          e.printStackTrace();
+        }
+        
+        ImageIcon imageIcon = new ImageIcon(image);
+        JLabel jLabel = new JLabel();
+        jLabel.setIcon(imageIcon);
+
+        jLabel.setVisible(true);
+        
+        return jLabel;
+	}
+	    
 }

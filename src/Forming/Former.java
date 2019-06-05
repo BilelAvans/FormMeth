@@ -35,11 +35,11 @@ public class Former {
 	
 	private static void generateNFAFromString(String matchingString) {
 		DFA dfa = DFA.GenerateDFA(matchingString);
-		DFA dfa2 = DFA.GenerateDFA("olleh");
-		System.out.println("Hello");
+		DFA dfa2 = DFA.GenerateDFA("abc");
+		System.out.println("cba");
 		DFA dfaJoined = dfa.addDFA(dfa2);
 		
-		boolean thisWorks = GraphwizExec.openDotExeCodeString(dfaJoined);
+		//boolean thisWorks = GraphwizExec.openDotExeCodeString(dfaJoined);
 		
 	}
 }

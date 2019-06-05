@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+
 public class GraphwizExec {
 	
 	public static boolean saveTextFile(String filename, String content) {
@@ -66,6 +69,28 @@ public class GraphwizExec {
 		}
 		
 		return false;
+		
+	}
+	
+	public static JLabel openDotExeCodePanel(IMethodAsString method) {
+		System.out.println("Here: "+ method.getMethodAsGraphVizString());
+		// Save our string as a file first
+		if (saveTextFile(method.getMethodName(), method.getMethodAsGraphVizString())) {
+			try {
+				// Call the file and create a 'jpg'
+				Process process = new ProcessBuilder("C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe","-Tjpeg", method.getMethodName(),"-o","graph.jpg").start();
+				
+				return ImageDisplay.GetJComponentFromFile(System.getProperty("user.dir") + "/graph.jpg");
+				
+				// Open the JPeg in your standard photo viewer
+				
+			} catch (IOException ex) {
+				return null;
+			}		
+			
+		}
+		
+		return null;
 		
 	}
 }
