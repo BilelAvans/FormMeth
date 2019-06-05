@@ -1,9 +1,0 @@
-digraph { 
-node [shape = doublecircle]; 4 ;
-node [shape = circle]; 
-0 -> 1 [ label="h", weigth="0.6"]; 
-1 -> 2 [ label="h", weigth="0.6"]; 
-2 -> 3 [ label="h", weigth="0.6"]; 
-3 -> 4 [ label="h", weigth="0.6"]; 
-4 -> 4 [ label="h", weigth="0.6"]; 
-}

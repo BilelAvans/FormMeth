@@ -89,9 +89,9 @@ public class DFA extends NDFA {
 							}
 						}
 
-						if (node.get_isEndSymbol())
-							newRule = new TransitionRule<Integer>(c, counter);
-						else if (newRule == null)
+/*						if (node.get_isEndSymbol())
+//							newRule = new TransitionRule<Integer>(c, counter);
+//						else */ if (newRule == null)
 							newRule = new TransitionRule<Integer>(c, 0);
 
 						node.addTransitions(newRule);
