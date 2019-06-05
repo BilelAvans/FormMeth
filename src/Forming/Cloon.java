@@ -10,7 +10,7 @@ public class Cloon<T> {
 	private T _ob;
 	
 	public Cloon(T ob) {
-		this._ob = ob;
+		this._ob = this.deepClone(ob);
 	}
 	
 	
@@ -28,11 +28,11 @@ public class Cloon<T> {
 
 
 	@SuppressWarnings("unchecked")
-	public T deepClone(){
+	public T deepClone(T object){
 		  try {
 		        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-		        objectOutputStream.writeObject(this._ob);
+		        objectOutputStream.writeObject(object);
 		        ByteArrayInputStream bais = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
 		        ObjectInputStream objectInputStream = new ObjectInputStream(bais);
 		          return (T)objectInputStream.readObject();

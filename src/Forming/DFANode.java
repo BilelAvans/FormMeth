@@ -1,9 +1,11 @@
 package Forming;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Optional;
 
 
-public class DFANode implements Comparable<DFANode> {
+public class DFANode implements Comparable<DFANode>, Serializable {
 	
 	private int _state;
 	
@@ -24,7 +26,14 @@ public class DFANode implements Comparable<DFANode> {
 		
 		addTransitions(transitions);
 	}
+	
+	
 
+
+	public DFANode(int _state) {
+		super();
+		this._state = _state;
+	}
 
 	public int get_state() { 
 		return _state;
@@ -33,6 +42,10 @@ public class DFANode implements Comparable<DFANode> {
 
 	public void set_state(int _state) {
 		this._state = _state;
+	}
+	
+	public TransitionRule<Integer> getTransitionRuleBySymbol(String symbol) {
+		return this.get_transitions().stream().filter(tr -> tr.getSign().equals(symbol)).findAny().get();
 	}
 
 
@@ -70,6 +83,8 @@ public class DFANode implements Comparable<DFANode> {
 			
 		return false;
 	}
+	
+	
 
 
 	@Override

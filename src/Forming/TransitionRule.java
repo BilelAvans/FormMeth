@@ -1,6 +1,8 @@
 package Forming;
 
-public class TransitionRule<T> {
+import java.io.Serializable;
+
+public class TransitionRule<T> implements Serializable {
 
 	// Sign from our alfabet.
 	private String _sign;
@@ -37,6 +39,17 @@ public class TransitionRule<T> {
 		return "";
 //		return _isEnd ? _sign + " -> " + _sign + _goTo + " | "+ _sign : 
 //						_sign + " -> " + _sign + _goTo;
+	}
+
+
+
+	@SuppressWarnings("unchecked")
+	public void setGoTo(int i) {
+		if (this._goTo instanceof Integer)
+			this._goTo = (T) (Object)((int)this._goTo + i);
+		else if (this._goTo instanceof String)
+			this._goTo = (T) ((Object)((String)this._goTo) + String.valueOf(i));
+		
 	}
 	
 }

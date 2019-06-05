@@ -1,6 +1,8 @@
 package Forming;
 
-public class Alfabet {
+import java.io.Serializable;
+
+public class Alfabet implements Serializable {
 	
 	private String[] _allSigns;
 	
@@ -23,5 +25,12 @@ public class Alfabet {
 	public void setAllSigns(String[] allSigns) {
 		this._allSigns = allSigns;
 		
+	}
+	
+	@Override
+	public boolean equals(Object ob) {
+		Alfabet other = (Alfabet)ob;
+		
+		return this._allSigns.equals(other.getAllSigns());
 	}
 }

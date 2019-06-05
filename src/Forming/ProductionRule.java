@@ -1,9 +1,10 @@
 package Forming;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ProductionRule<T> {
+public class ProductionRule<T> implements Serializable {
 	
 	private T _from;
 	
