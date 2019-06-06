@@ -1,0 +1,10 @@
+digraph { 
+node [shape = doublecircle]; 2 ;
+node [shape = circle]; 
+0 -> 1 [ label="a", weigth="0.6"]; 
+0 -> 0 [ label="c", weigth="0.6"]; 
+1 -> 2 [ label="c", weigth="0.6"]; 
+1 -> 0 [ label="a", weigth="0.6"]; 
+2 -> 0 [ label="a", weigth="0.6"]; 
+2 -> 0 [ label="c", weigth="0.6"]; 
+}

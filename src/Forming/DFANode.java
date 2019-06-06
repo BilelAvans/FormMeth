@@ -44,8 +44,8 @@ public class DFANode implements Comparable<DFANode>, Serializable {
 		this._state = _state;
 	}
 	
-	public TransitionRule<Integer> getTransitionRuleBySymbol(String symbol) {
-		return this.get_transitions().stream().filter(tr -> tr.getSign().equals(symbol)).findAny().get();
+	public Optional<TransitionRule<Integer>> getTransitionRuleBySymbol(String symbol) {
+		return this.get_transitions().stream().filter(tr -> tr.getSign().equals(symbol)).findAny();
 	}
 
 

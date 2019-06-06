@@ -23,9 +23,9 @@ public class NDFA implements IMethodAsString, Serializable {
 
 	protected final int _startState;
 
-	protected String matchString = "";
 	
 	public static final char EmptySign = 'ε';
+	protected String matchString = "";
 	
 	// For display and saving purpouses
 	protected String _name;
@@ -105,8 +105,7 @@ public class NDFA implements IMethodAsString, Serializable {
 			final char c = content.charAt(counter);
 
 			// Where to go? Read from TransitionRule
-			Optional<TransitionRule<Integer>> rule = node.get().get_transitions().stream()
-					.filter((TransitionRule<Integer> tr) -> tr.getSign().equals(Character.toString(c))).findAny();
+			Optional<TransitionRule<Integer>> rule = node.get().getTransitionRuleBySymbol(Character.toString(c));
 
 			if (rule.isEmpty())
 				return false;
@@ -243,11 +242,14 @@ public class NDFA implements IMethodAsString, Serializable {
 				nodes.add(node);
 			// DFANode node = new DFANode();
 				for (String a : alfabet.getAllSigns()) {
-					TransitionRule<Integer> ruleA = this.getNodeByState(x).getTransitionRuleBySymbol(a);
-					TransitionRule<Integer> ruleB = otherDFA.getNodeByState(y).getTransitionRuleBySymbol(a);
-					
-					var newRule = new TransitionRule<Integer>(a, ruleA.getGoTo() * this._nodes.size() + ruleB.getGoTo());
-					node.addTransitions(newRule);
+					Optional<TransitionRule<Integer>> ruleA = this.getNodeByState(x).get().getTransitionRuleBySymbol(a);
+					Optional<TransitionRule<Integer>> ruleB = otherDFA.getNodeByState(y).get().getTransitionRuleBySymbol(a);
+					// Both rules exist
+					if (!ruleA.isEmpty() && !ruleB.isEmpty()) {
+						var newRule = new TransitionRule<Integer>(a, ruleA.get().getGoTo() * this._nodes.size() + ruleB.get().getGoTo());
+						node.addTransitions(newRule);
+					}
+				
 					
 				}
 			}
@@ -273,8 +275,8 @@ public class NDFA implements IMethodAsString, Serializable {
 		}
 	}
 
-	protected DFANode getNodeByState(Integer state) {
-		return this._nodes.stream().filter(r -> r.get_state() == state).findAny().get();
+	protected Optional<DFANode> getNodeByState(Integer state) {
+		return this._nodes.stream().filter(r -> r.get_state() == state).findAny();
 	}
 
 	public List<DFANode> get_nodes() {
