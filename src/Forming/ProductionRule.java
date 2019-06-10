@@ -50,10 +50,24 @@ public class ProductionRule implements Serializable {
 		for (TransitionRule<String> rule: _rules) {
 			
 			var list = new ArrayList<String>(Arrays.asList(endStates));
-			str.append(rule.toProductionRuleString(list)+"\n");
+			str.append(rule.toProductionRuleString(this.getFrom(), list)+"\n");
 		}
 		
 		return str.toString();
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		ProductionRule other = (ProductionRule)obj;
+		
+		return this._from.equals(other.getFrom());
+	}
+
+	public void setEndState(boolean b) {
+		this._isEnd = b;
+		
+	}
+	
+	
 	
 }

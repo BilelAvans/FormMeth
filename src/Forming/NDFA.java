@@ -24,7 +24,7 @@ public class NDFA implements IMethodAsString, Serializable {
 	protected final int _startState;
 
 	
-	public static final char EmptySign = 'ε';
+	public static final String EmptySign = "ε";
 	protected String matchString = "";
 	
 	// For display and saving purpouses
@@ -90,10 +90,16 @@ public class NDFA implements IMethodAsString, Serializable {
 	}
 
 	public boolean isValidString(String content) {
+		if (!this.get_alfabet().canFormString(content))
+			return false;
+		
+		
 		int counter = 0;
 
 		// Follow the path, get Start
 		Optional<DFANode> node = _nodes.stream().filter((DFANode n) -> n.get_state() == this._startState).findAny();
+		
+		TransitionRule<String> lastEpsilonAfrit = null;
 
 		while (!node.isEmpty()) {
 
@@ -107,12 +113,28 @@ public class NDFA implements IMethodAsString, Serializable {
 			// Where to go? Read from TransitionRule
 			Optional<TransitionRule<Integer>> rule = node.get().getTransitionRuleBySymbol(Character.toString(c));
 
-			if (rule.isEmpty())
-				return false;
+			if (rule.isEmpty()) {
+				// Can only use epsilon if it's an NDFA
+				if (this instanceof NDFA) {
+					// Check for epsilon if no characters are found, meaby we can work this out
+					Optional<TransitionRule<Integer>> epsilonRule = node.get().getTransitionRuleBySymbol(this.EmptySign);
+					
+					if (!epsilonRule.isEmpty()) {
+						// Found epsilon!!!
+						// Decrement count by 1, because we're still using the same character.
+						counter--;
+						node = _nodes.stream().filter((DFANode n) -> n.get_state() == epsilonRule.get().getGoTo()).findAny();
+					} else {
+						return false;
+					}
+				}
 
-			// next in line
-			node = _nodes.stream().filter((DFANode n) -> n.get_state() == rule.get().getGoTo()).findAny();
+			} else {
 
+				// next in line
+				node = _nodes.stream().filter((DFANode n) -> n.get_state() == rule.get().getGoTo()).findAny();
+			}
+				
 			// Increment count to get next char in next loop iteration.
 			counter++;
 		}
@@ -139,7 +161,7 @@ public class NDFA implements IMethodAsString, Serializable {
 			}
 		}
 
-		endNodesString += (";\n");
+		//endNodesString += (";\n");
 		builder.append(endNodesString);
 		builder.append("node [shape = circle]; \n");
 		builder.append(otherStr);
@@ -151,12 +173,22 @@ public class NDFA implements IMethodAsString, Serializable {
 
 	@Override
 	public String getMethodName() {
-		return this._name;
+		return this._name == null ? "test" : this._name;
 	}
 
 	public ArrayList<DFANode> getEndStates() {
 		// Get all points with isEndSymbol == true
 		List<DFANode> nodes = _nodes.stream().filter(node -> node.get_isEndSymbol()).collect(Collectors.toList());
+
+		if (nodes.size() > 0) {
+			return (ArrayList<DFANode>) nodes;
+		}
+		return new ArrayList<DFANode>();
+	}
+	
+	public ArrayList<DFANode> getStartStates() {
+		// Get all points with isEndSymbol == true
+		List<DFANode> nodes = _nodes.stream().filter(node -> !node.get_isEndSymbol()).collect(Collectors.toList());
 
 		if (nodes.size() > 0) {
 			return (ArrayList<DFANode>) nodes;
@@ -170,6 +202,7 @@ public class NDFA implements IMethodAsString, Serializable {
 
 	public void setMatchString(String matchString) {
 		this.matchString = matchString;
+		this.setMethodName(matchString);
 	}
 
 
@@ -239,7 +272,7 @@ public class NDFA implements IMethodAsString, Serializable {
 				DFANode node = new DFANode(x * this._nodes.size() + y);
 				
 				
-				nodes.add(node);
+			nodes.add(node);
 			// DFANode node = new DFANode();
 				for (String a : alfabet.getAllSigns()) {
 					Optional<TransitionRule<Integer>> ruleA = this.getNodeByState(x).get().getTransitionRuleBySymbol(a);
@@ -361,41 +394,7 @@ public class NDFA implements IMethodAsString, Serializable {
 //		return dfa;
 //	}
 
-//	public DFA minimize() {
-//		// Create our groups
-//		// All non-ending states		
-//		Map<Integer, ArrayList<DFANode>> startNodes = new HashMap<Integer, ArrayList<DFANode>>();
-//		// End states
-//		Map<Integer, ArrayList<DFANode>> endNodes = new HashMap<Integer, ArrayList<DFANode>>();
-//		
-//		Integer currentNumber = 0;
-//		int numOfNonEnds = 1;
-//		int numOfEnds = 1;
-//		
-//		startNodes.put(currentNumber, new ArrayList<DFANode>());
-//		currentNumber = currentNumber++;
-//		startNodes.put(currentNumber, new ArrayList<DFANode>());
-//		currentNumber++;
-//		
-//		
-//		for (DFANode node: this._nodes) {
-//			if (node.get_isEndSymbol())
-//				endNodes.get(1).add(node);
-//			else
-//				startNodes.get(0).add(node);
-//		}
-//		
-//		// Create table of states
-//		
-//		
-//		
-//		// Divide in subgroups if not all nodes from same group enter same node
-//			
-//
-//		
-//		
-//		return null;
-//	}
+
 //	
 //	public static void splitInGroups(int startState, Map<Integer, ArrayList<DFANode>> groupStates, int currentNumber){
 //		Set<String> uniqueStuff = new LinkedHashSet<>();

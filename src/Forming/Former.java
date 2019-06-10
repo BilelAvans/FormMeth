@@ -1,13 +1,26 @@
 package Forming;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import Parsing.GraphwizExec;
 
 public class Former {
 	public static void main(String[] args) {
 		//generateNFA();
-		generateNFAFromString("hello");
+		//generateNFAFromString("hello");
 		//DFA dfa = DFA.fromGraphVizStringToDFA(GraphwizExec.loadTextFile("DFA.gv"));
 		//GraphwizExec.openDotExeCodeString(dfa);
+		
+		DFA ndfa = DFA.GenerateDFA(DFA.DFAGenerationOptions.ENDS_WITH, "aaaab");
+		GraphwizExec.openDotExeCodeString(ndfa);
+		ndfa = ndfa.minimize();
+		GraphwizExec.openDotExeCodeString(ndfa);
+//		ndfa.setMethodName("hello");
+//		ndfa = ndfa.minimize();
+//		GraphwizExec.openDotExeCodeString(ndfa);
+//		System.out.println("Done");
+//		System.out.println(ndfa.isValidString("abc"));
 	}
 	
 	@SuppressWarnings({"unchecked"})
@@ -35,7 +48,7 @@ public class Former {
 	
 	private static void generateNFAFromString(String matchingString) {
 		//DFA dfa = DFA.GenerateDFA(matchingString);
-		DFA dfa2 = DFA.GenerateDFA("abc");
+		DFA dfa2 = DFA.GenerateDFA(null, "abc");
 		Grammar gram = dfa2.toGrammar();
 		System.out.println(gram.toGrammarString());
 		//DFA dfaJoined = (DFA)dfa.addDFA(dfa2);

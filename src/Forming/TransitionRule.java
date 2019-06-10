@@ -33,10 +33,25 @@ public class TransitionRule<T> implements Serializable {
 		return _goTo == goTo;
 	}
 
-	public String toProductionRuleString(ArrayList<T> endSigns) {
-		return endSigns.contains(_goTo) ? _sign + " -> " + _sign + _goTo + " | "+ _sign + " " : 
-											_sign + " -> " + _sign + _goTo + " ";
+	public String toProductionRuleString(String from, ArrayList<T> endSigns) {
+		return endSigns.contains(_goTo) ? from + " -> " + _sign + _goTo + " | "+ _sign + " " : 
+											from + " -> " + _sign + _goTo + " ";
 	}
+	
+	@Override
+	public boolean equals(Object ob) {
+		try {
+			TransitionRule otherRule = (TransitionRule) ob;
+			
+			return otherRule.getGoTo().equals(this.getGoTo()) && otherRule.getSign().equals(this.getSign());
+		} catch (ClassCastException e) {
+			
+		}
+		
+		return false;
+		
+	}
+
 
 
 

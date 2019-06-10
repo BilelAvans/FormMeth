@@ -1,36 +1,56 @@
 package Forming;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import Parsing.MoreFunctions.TwoParamFunction;
 
 public class DFA extends NDFA {
 
 	public DFA(Alfabet alfa, int startState, DFANode... nodes) {
 		super(alfa, startState, nodes);
+		alfa.removeEpsilon();
 		// TODO Auto-generated constructor stub
 	}
+	
+	public static enum DFAGenerationOptions { STARTS_WITH, ENDS_WITH, CONTAINS, FULLSTRING };
 
-	public static DFA GenerateDFA(String matchString) {
-		if (matchString.length() > 25)
-			return null; // Can't handle letters above Z yet. Also need to reformat it for numbers later
-							// (q0, q1, q2, ...)
-
-		// Add every new occuring character to a unique set
-		Set<String> alfabetCharacters = new LinkedHashSet<String>();
+	public static DFA GenerateDFA(DFAGenerationOptions options, String matchString) {
 		// Create all our nodes
 		ArrayList<DFANode> nodes = new ArrayList<DFANode>();
+		var alfabet = Alfabet.fromString(matchString);
+		
+		int counter = 0;
+//		if (options == DFAGenerationOptions.ENDS_WITH || options == DFAGenerationOptions.CONTAINS) {
+//			DFANode firstNode = new DFANode(counter, false);
+//			for (String s: alfabet.getAllSigns()) {
+//				firstNode.addTransitions(new TransitionRule<Integer>(s, counter));
+//			}
+//			nodes.add(firstNode);
+//		}
+			
+		
+		// Add every new occuring character to a unique set
+		Set<String> alfabetCharacters = new LinkedHashSet<String>();
+
 		// Start node
-		DFANode lastDFA = new DFANode(0, false);
-		int counter = 1;
+		DFANode lastDFA = new DFANode(counter, false);
+		
+		counter++;
 		for (char[] c = matchString.toCharArray(); counter <= c.length; counter++) {
-			System.out.println(c[counter - 1]);
 			// Add every new character to our alfabet
 			alfabetCharacters.add(Character.toString(c[counter - 1]));
-
-			lastDFA.addTransitions(new TransitionRule<Integer>(Character.toString(c[counter - 1]), counter));
+			
+			if (!(Character.toString(c[counter - 1]).equals(NDFA.EmptySign)))
+				lastDFA.addTransitions(new TransitionRule<Integer>(Character.toString(c[counter - 1]), counter));
 
 			// Add node to list before create a new one
 			nodes.add(lastDFA);
@@ -40,8 +60,16 @@ public class DFA extends NDFA {
 		}
 
 		nodes.add(lastDFA);
+		
+//		if (options == DFAGenerationOptions.STARTS_WITH) {
+//			DFANode lastNode = new DFANode(counter, true);
+//			for (String s: alfabet.getAllSigns()) {
+//				lastNode.addTransitions(new TransitionRule<Integer>(s, counter));
+//			}
+//			nodes.add(lastNode);
+//		}
 
-		DFA dfa = new DFA(new Alfabet(alfabetCharacters.toArray(String[]::new)), 0, nodes.toArray(DFANode[]::new));
+		DFA dfa = new DFA(alfabet, 0, nodes.toArray(DFANode[]::new));
 		dfa.setMatchString(matchString);
 		dfa.addMissingAlfabetCharacters();
 
@@ -73,8 +101,9 @@ public class DFA extends NDFA {
 	protected void addMissingAlfabetCharacters() {
 
 		int counter = 0;
-		
+		this._alfabet.removeEpsilon();
 		this._nodes = this._nodes.stream().sorted((n1, n2) -> n1.compareTo(n2)).collect(Collectors.toList());
+		
 		String currentPath = "";
 		for (DFANode node : this._nodes) {
 			
@@ -89,6 +118,7 @@ public class DFA extends NDFA {
 					}
 				} else {
 					Optional<TransitionRule<Integer>> rule = node.getTransitionRuleBySymbol(c);
+					System.out.println(rule.isEmpty() +" on "+ c);
 					if (rule.isEmpty()) {
 						// Where must we go then?
 						String firstString = currentPath + c;
@@ -99,14 +129,10 @@ public class DFA extends NDFA {
 							// Look for the biggest amount of chars in which the back of our new string
 							// compares to the front of the other. (Does this even make sense?)
 							String secondString = this.matchString.substring(0, count);
-							String thirdString = firstString.substring(firstString.length() - count,
-									firstString.length());
-
-							System.out.println("Comparing: " + secondString + " to: " + thirdString +" in node: "+ node.get_state());
-							System.out.println("Comparing: " + secondString + " to: " + thirdString +" in node: "+ node.get_state());
+							String thirdString = firstString.substring(firstString.length() - count, firstString.length());
 
 							if (thirdString.equals(secondString)) {
-								newRule = new TransitionRule<Integer>(c, count % _nodes.size());
+								newRule = new TransitionRule<Integer>(c, count);
 							}
 						}
 
@@ -128,5 +154,128 @@ public class DFA extends NDFA {
 		}
 
 	}
+	
+	public DFA minimize() {
+		DFA dfa = new Cloon<DFA>(this).get_ob();
 
+		ArrayList<ArrayList<DFANode>> allNodes = new ArrayList<>();
+		allNodes.add(dfa.getStartStates());
+		allNodes.add(dfa.getEndStates());
+		
+		
+		TwoParamFunction<ArrayList<ArrayList<DFANode>>, DFANode, Integer> groupOf = (list, node) -> {
+			for (int counter = 0; counter < list.size(); counter++) {
+				if (list.get(counter).contains(node))
+					return counter;
+			}
+			
+			return -1;
+		};		
+		
+		int cunter = 0;
+		// Loop until we cant minimalize anymore
+		for (boolean blocksComplete = false; !blocksComplete; ) {
+			System.out.println("Busy: "+ cunter);
+			cunter++;
+			blocksComplete = true;
+			
+			ArrayList<ArrayList<DFANode>> newNodes = new ArrayList<>();
+		
+			for (ArrayList<DFANode> nodesList: allNodes) {
+				//ArrayList<String> groups = new ArrayList<String>();
+				HashMap<DFANode, String> map = new HashMap<>();
+				
+				for (DFANode node: nodesList) {
+					String paths = "";
+					
+					for(String s: dfa.get_alfabet().getAllSigns()) {
+						// Find out where it all leads
+						if (!paths.isEmpty() && !paths.endsWith(",")) {
+							paths += ",";
+						} 
+						
+						// Get goto
+						Optional<TransitionRule<Integer>> tr = node.getTransitionRuleBySymbol(s);
+						
+						paths += String.valueOf(groupOf.apply(allNodes, new DFANode(tr.get().getGoTo())));
+						
+					}
+					
+					map.put(node, paths);
+					
+				}
+				// Check a set from all groups and check if we have more than 1 (if so, we need to rearrange
+				Set<String> uniqueGroups = new HashSet<String>(map.values());
+				boolean isCorrect = uniqueGroups.size() == 1;
+				// All blocks must be complete, so we need this operation
+				blocksComplete &= isCorrect;
+				
+					// Create new groups
+					// Create a group from a unique set values
+					for (String s: uniqueGroups) {
+						System.out.println("it");
+						System.out.println(s);
+						// Get all nodes of a group and add them to a new one
+						newNodes.add(new ArrayList<DFANode>(map.entrySet().stream().filter(entry -> entry.getValue().equals(s)).map(kv -> kv.getKey()).collect(Collectors.toList())));
+							
+					}
+			}
+			System.out.println("Nodes: "+ newNodes.size());
+			allNodes = newNodes;
+			
+
+		}
+		
+		// Complete, let's reform our nodes
+		var nodes = new ArrayList<DFANode>();
+		
+		int counter = 0;
+		
+		for (ArrayList<DFANode> group: allNodes) {
+			// Every group becomes 1 node
+			Optional<DFANode> rules = group.stream().findAny();
+			
+			if (!rules.isEmpty())
+			{
+				DFANode node = new DFANode(counter, true, rules.get().get_transitions().toArray(TransitionRule[]::new));
+				nodes.add(node);
+				counter++;
+			}
+			
+		}
+		System.out.println("Nodes: "+ nodes.size());
+		return new DFA(this._alfabet, 0, nodes.toArray(DFANode[]::new));
+	}
+	
+	private ArrayList<DFANode> JoinNodes(ArrayList<ArrayList<DFANode>> n1){
+		ArrayList<DFANode> nodes = new ArrayList<>();
+		
+		for (ArrayList<DFANode> list: n1) {
+			for (DFANode node: list) {
+				nodes.add(node);
+			}
+		}
+		
+		return nodes;
+	}
+	
+	private ArrayList<DFANode> RemoveNodes(ArrayList<ArrayList<DFANode>> n1, DFANode no){
+		ArrayList<DFANode> nodes = new ArrayList<>();
+		
+		for (ArrayList<DFANode> list: n1) {
+			Iterator<DFANode> nodeiterator = list.iterator();
+			
+			while (nodeiterator.hasNext()) {
+				DFANode node = nodeiterator.next();
+				// Remove if node is found
+				if (node.equals(no))
+					nodeiterator.remove();
+			}
+		}
+		
+		return nodes;
+	}
+	
+	
+	
 }

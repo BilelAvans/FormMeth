@@ -15,16 +15,22 @@ import javax.swing.JOptionPane;
 public class GraphwizExec {
 	
 	public static boolean openDotExeCodeString(IMethodAsString method) {
-		String fullGvName = System.getProperty("user.dir")+"\\Storage\\JPEG\\" +method.getMethodName()+".jpg";
+		String fullGvName = System.getProperty("user.dir")+"\\Storage\\JPEG\\" +method.getMethodName()+".gv";
 		String fullJpegName = System.getProperty("user.dir")+"\\Storage\\JPEG\\" +method.getMethodName()+".jpg";
 		
 		// Save our string as a file first
 		if (FileStorage.saveTextFile(method.getMethodName(), method.getMethodAsGraphVizString())) {
 			try {
 				// Call the file and create a 'jpg'
-				Process process = new ProcessBuilder("C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe","-Tjpeg", method.getMethodName(),"-o","/Storage/JPEG/" +method.getMethodName()+".jpg").start();
+				Process process = new ProcessBuilder("C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe","-Tjpeg", fullGvName,"-o", fullJpegName).start();
+				while (process.isAlive()) {
+					// Wait
+				}
+				BufferedReader err = new BufferedReader(new InputStreamReader(process.getErrorStream())); 
+				System.out.println(err.readLine());
 				
-				new ImageDisplay(System.getProperty("user.dir") +"/Storage/JPEG/" +method.getMethodName()+".jpg");
+				
+				new ImageDisplay(fullJpegName);
 				
 				// Open the JPeg in your standard photo viewer
 				

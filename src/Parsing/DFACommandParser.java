@@ -9,11 +9,10 @@ public class DFACommandParser {
 		if (str.length() == 0)
 			return (DFA)DFA.Empty();
 		
-		DFA currentDFA = DFA.GenerateDFA(str);
+		DFA currentDFA = DFA.GenerateDFA(null, str);
 		
 		if (str.split(" ").length == 1)
 			return currentDFA;
-		
 		
 		else {
 			String[] splitString = str.split("\\\\s+");
@@ -21,7 +20,7 @@ public class DFACommandParser {
 			System.out.println(str);
 			
 			for (int counter = 1; counter < splitString.length; counter += 2) {
-				DFA newDFA = DFA.GenerateDFA(splitString[counter+1]);
+				DFA newDFA = DFA.GenerateDFA(null, splitString[counter+1]);
 				System.out.println(splitString[counter+1]);
 				
 				if (splitString[counter].equals("&&"))

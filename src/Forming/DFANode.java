@@ -27,8 +27,6 @@ public class DFANode implements Comparable<DFANode>, Serializable {
 		addTransitions(transitions);
 	}
 	
-	
-
 
 	public DFANode(int _state) {
 		super();
@@ -85,16 +83,12 @@ public class DFANode implements Comparable<DFANode>, Serializable {
 	}
 	
 	
-
-
 	@Override
 	public int compareTo(DFANode node) {		
 		
 		return Integer.valueOf((this._state)).compareTo(Integer.valueOf(node.get_state()));
 		
 	}
-	
-	
 	
 	
 	
