@@ -196,7 +196,6 @@ public class DFA extends NDFA {
 						
 						// Get goto
 						Optional<TransitionRule<Integer>> tr = node.getTransitionRuleBySymbol(s);
-						System.out.println(node.get_state() +" Rule is "+ tr.get().getSign() +" -> "+ tr.get().getGoTo());
 						
 						if (!tr.isEmpty())
 							paths += String.valueOf(groupOf.apply(allNodes, new DFANode(tr.get().getGoTo())));
