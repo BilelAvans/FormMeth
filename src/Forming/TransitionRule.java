@@ -53,14 +53,11 @@ public class TransitionRule<T> implements Serializable {
 	}
 
 
-
-
 	@SuppressWarnings("unchecked")
-	public void setGoTo(int i) {
-		if (this._goTo instanceof Integer)
-			this._goTo = (T) (Object)((int)this._goTo + i);
-		else if (this._goTo instanceof String)
-			this._goTo = (T) ((Object)((String)this._goTo) + String.valueOf(i));
+	public void setGoTo(T i) {
+		this._goTo = (T)i;
+		
+		System.out.println("New go to: "+ i +" and "+ this._goTo);
 		
 	}
 	

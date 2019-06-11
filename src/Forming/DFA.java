@@ -118,19 +118,21 @@ public class DFA extends NDFA {
 					}
 				} else {
 					Optional<TransitionRule<Integer>> rule = node.getTransitionRuleBySymbol(c);
-					System.out.println(rule.isEmpty() +" on "+ c);
+					
 					if (rule.isEmpty()) {
 						// Where must we go then?
 						String firstString = currentPath + c;
 						TransitionRule<Integer> newRule = null;
 
-						for (int count = 0; count < counter; count++) {
+						for (int count = 0; count <= counter; count++) {
 							// Match the strings
 							// Look for the biggest amount of chars in which the back of our new string
 							// compares to the front of the other. (Does this even make sense?)
 							String secondString = this.matchString.substring(0, count);
 							String thirdString = firstString.substring(firstString.length() - count, firstString.length());
 
+							System.out.println("Comp "+ secondString +" to "+ thirdString);
+							
 							if (thirdString.equals(secondString)) {
 								newRule = new TransitionRule<Integer>(c, count);
 							}
@@ -162,21 +164,19 @@ public class DFA extends NDFA {
 		allNodes.add(dfa.getStartStates());
 		allNodes.add(dfa.getEndStates());
 		
-		
+		// Function to check in which arraylist a specific node is
+		// Needed to caluclate block name/number
 		TwoParamFunction<ArrayList<ArrayList<DFANode>>, DFANode, Integer> groupOf = (list, node) -> {
 			for (int counter = 0; counter < list.size(); counter++) {
 				if (list.get(counter).contains(node))
 					return counter;
 			}
-			
+			// -1 = error code.
 			return -1;
 		};		
 		
-		int cunter = 0;
 		// Loop until we cant minimalize anymore
 		for (boolean blocksComplete = false; !blocksComplete; ) {
-			System.out.println("Busy: "+ cunter);
-			cunter++;
 			blocksComplete = true;
 			
 			ArrayList<ArrayList<DFANode>> newNodes = new ArrayList<>();
@@ -190,40 +190,53 @@ public class DFA extends NDFA {
 					
 					for(String s: dfa.get_alfabet().getAllSigns()) {
 						// Find out where it all leads
-						if (!paths.isEmpty() && !paths.endsWith(",")) {
+						if (!paths.isEmpty()) {
 							paths += ",";
 						} 
 						
 						// Get goto
 						Optional<TransitionRule<Integer>> tr = node.getTransitionRuleBySymbol(s);
+						System.out.println(node.get_state() +" Rule is "+ tr.get().getSign() +" -> "+ tr.get().getGoTo());
 						
-						paths += String.valueOf(groupOf.apply(allNodes, new DFANode(tr.get().getGoTo())));
-						
+						if (!tr.isEmpty())
+							paths += String.valueOf(groupOf.apply(allNodes, new DFANode(tr.get().getGoTo())));
+						else
+							return null;
 					}
 					
 					map.put(node, paths);
 					
 				}
-				// Check a set from all groups and check if we have more than 1 (if so, we need to rearrange
+				// Check a set from all groups and check if we have more than 1 (if so, we need to rearrange)
 				Set<String> uniqueGroups = new HashSet<String>(map.values());
 				boolean isCorrect = uniqueGroups.size() == 1;
 				// All blocks must be complete, so we need this operation
 				blocksComplete &= isCorrect;
 				
-					// Create new groups
-					// Create a group from a unique set values
-					for (String s: uniqueGroups) {
-						System.out.println("it");
-						System.out.println(s);
-						// Get all nodes of a group and add them to a new one
-						newNodes.add(new ArrayList<DFANode>(map.entrySet().stream().filter(entry -> entry.getValue().equals(s)).map(kv -> kv.getKey()).collect(Collectors.toList())));
-							
-					}
+				// Create new groups
+				// Create a group from a unique set values
+				for (String s: uniqueGroups) {
+					// Get all nodes of a group and add them to a new one
+					ArrayList<DFANode> nodesToAdd = new ArrayList<DFANode>(map.entrySet().stream().filter(entry -> entry.getValue().equals(s)).map(kv -> kv.getKey()).collect(Collectors.toList()));
+					//RemoveNodes(allNodes, nodesToAdd);	
+					newNodes.add(nodesToAdd);
+					
+				}
 			}
-			System.out.println("Nodes: "+ newNodes.size());
+			
+			for (ArrayList<DFANode> n: newNodes) {				
+				for (var node: n) {					
+					for (var trans: node.get_transitions()) {
+						int newGoTo = groupOf.apply(newNodes, new DFANode(trans.getGoTo()));
+						trans.setGoTo(newGoTo);
+					}
+					
+					//RemoveNodes(newNodes, n);
+				}
+			}
+			
 			allNodes = newNodes;
 			
-
 		}
 		
 		// Complete, let's reform our nodes
@@ -233,20 +246,20 @@ public class DFA extends NDFA {
 		
 		for (ArrayList<DFANode> group: allNodes) {
 			// Every group becomes 1 node
-			Optional<DFANode> rules = group.stream().findAny();
+			ArrayList<TransitionRule<Integer>> rules = group.get(0).get_transitions();
 			
 			if (!rules.isEmpty())
 			{
-				DFANode node = new DFANode(counter, true, rules.get().get_transitions().toArray(TransitionRule[]::new));
+				DFANode node = new DFANode(counter, group.get(0).get_isEndSymbol(), rules.toArray(TransitionRule[]::new));
 				nodes.add(node);
 				counter++;
 			}
 			
 		}
-		System.out.println("Nodes: "+ nodes.size());
 		return new DFA(this._alfabet, 0, nodes.toArray(DFANode[]::new));
 	}
 	
+
 	private ArrayList<DFANode> JoinNodes(ArrayList<ArrayList<DFANode>> n1){
 		ArrayList<DFANode> nodes = new ArrayList<>();
 		
@@ -259,7 +272,7 @@ public class DFA extends NDFA {
 		return nodes;
 	}
 	
-	private ArrayList<DFANode> RemoveNodes(ArrayList<ArrayList<DFANode>> n1, DFANode no){
+	private ArrayList<DFANode> RemoveNodes(ArrayList<ArrayList<DFANode>> n1, ArrayList<DFANode> nodesToAdd){
 		ArrayList<DFANode> nodes = new ArrayList<>();
 		
 		for (ArrayList<DFANode> list: n1) {
@@ -268,8 +281,11 @@ public class DFA extends NDFA {
 			while (nodeiterator.hasNext()) {
 				DFANode node = nodeiterator.next();
 				// Remove if node is found
-				if (node.equals(no))
-					nodeiterator.remove();
+				for (DFANode no: nodesToAdd) {
+					if (node.equals(no))
+						nodeiterator.remove();
+				}
+
 			}
 		}
 		

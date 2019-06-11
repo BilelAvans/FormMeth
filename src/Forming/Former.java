@@ -12,10 +12,12 @@ public class Former {
 		//DFA dfa = DFA.fromGraphVizStringToDFA(GraphwizExec.loadTextFile("DFA.gv"));
 		//GraphwizExec.openDotExeCodeString(dfa);
 		
-		DFA ndfa = DFA.GenerateDFA(DFA.DFAGenerationOptions.ENDS_WITH, "aaaab");
-		GraphwizExec.openDotExeCodeString(ndfa);
+		DFA ndfa = DFA.GenerateDFA(DFA.DFAGenerationOptions.FULLSTRING, "aab");
+		//GraphwizExec.openDotExeCodeString(ndfa);
 		ndfa = ndfa.minimize();
-		GraphwizExec.openDotExeCodeString(ndfa);
+		//GraphwizExec.openDotExeCodeString(ndfa);
+		
+		ndfa.isValidString("aab");
 //		ndfa.setMethodName("hello");
 //		ndfa = ndfa.minimize();
 //		GraphwizExec.openDotExeCodeString(ndfa);
