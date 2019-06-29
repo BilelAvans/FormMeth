@@ -1,127 +1,178 @@
 package Forming;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Optional;
+
+import Parsing.Tuples.ThreeTuple;
+import Parsing.Tuples.TwoTuple;
 
 public class RegulExpress {
 
+	enum Operators { PLUS, DOT, OR, STAR, STRING }
+	ArrayList<String> _operatorsInArray = new ArrayList<String>(Arrays.asList(new String[]{ "+",".","|","*" }));
 	
-	public static enum Operators { OR, PLUS, STAR, DOT, String };
+	Operators _currentOperator;
+    Optional<String> _value;
+    
 	
-	private RegulExpress _right;
-	private RegulExpress _left;
+	public Optional<RegulExpress> _left = Optional.ofNullable(null), _right = Optional.ofNullable(null);
 	
-	private Operators _op;
-	private String _expressionPart;
+	private RegulExpress() { }
 	
-	public RegulExpress() {
-		this._op = Operators.String;
+	public RegulExpress(String s){
+		// Split up in groups
+		this.setInstances(s);
+		
 	}
 	
-	
-	public RegulExpress(String s) {
-		this._expressionPart = s;
-		this._op = Operators.String;
-	}
-	
-	public static RegulExpress Generate(String s) {
-		int counter = 0;
+	public void setInstances(String s) {
+		// Find operator
+		Optional<String> op = _operatorsInArray.stream().filter((String o) -> s.contains(o)).map(m -> m).findFirst();
 		
-		RegulExpress last = new RegulExpress(s);
-		
-		for (char[] strArray = s.toCharArray(); counter < s.length(); counter++) {
+		if (!op.isEmpty()) {
+			// Find occurence
+			int pos = s.indexOf(op.get());
 			
+			// Found operator, split this stuff.
+			this._left = Optional.ofNullable(new RegulExpress(s.substring(0, pos)));
+			this._right = Optional.ofNullable(new RegulExpress(s.substring(pos + 1, s.length())));
+			System.out.println(op.get());
+			this._currentOperator = stringToOperator(op.get());
+		}	else {
+			System.out.println("Got val: "+ s);
+			this._value = Optional.ofNullable(s);
+			this._currentOperator = Operators.STRING;
 		}
 		
 		
 	}
 	
-	public RegulExpress performOperation(Operators o, RegulExpress s) {
-		switch (o) {
-			case OR: return OR(s);
-			case STAR: return STAR(s);
-			case PLUS: return PLUS(s);
-			case DOT: return DOT(s);
-			default: return null;
+	public Operators getOperator() {
+		return this._currentOperator;
+	}
+	
+	public boolean validateString(String s) {
+		var ex = Optional.ofNullable(this);
+		int stringPos = 0;
+		
+		boolean lastWasTrue;
+		
+		while (ex.get().hasLeft()) {
+			// Set to most left
+			ex = ex.get().getLeft();
+		}
+		
+		for (char c: s.toCharArray()) {
+			System.out.println("Got char: "+ c);
+			if (ex.get().isValid(Character.toString(c))) {
+				System.out.println("Was here once");
+				ex = ex.get().getRight();
+				
+				if (!ex.isEmpty()) {
+					if (ex.get().getOperator() == Operators.OR) {
+						// Go to next operator, skip all
+						while (!ex.isEmpty() && !ex.get().isOperator()) {
+							ex = ex.get().getRight();
+						}
+					}
+				}
+				else // Right is empty, nothing more todo
+					return true;
+			} else {
+				return false;
+			}
+		}
+		
+		return false;
+	}
+	
+	public boolean isOperator() {
+		return this._currentOperator != Operators.STRING;
+	}
+	
+	public void setLeft(RegulExpress re) {
+		this._left = Optional.ofNullable(re);
+	}
+	
+	public void setRight(RegulExpress re) {
+		this._right = Optional.ofNullable(re);
+	}
+	
+	public Optional<RegulExpress> getRight() {
+		return this._right;
+	}
+	
+	public Optional<RegulExpress> getLeft() {
+		return this._left;
+	}
+	
+	public boolean hasLeft() {
+		return !this._left.isEmpty();
+	}
+	
+	public boolean hasRight() {
+		return !this._right.isEmpty();
+	}
+	
+	public String operatorToString(Operators a) {
+		switch (a) {
+			case PLUS: return "+"; 
+			case OR: return "|"; 
+			case STAR: return "*"; 
+			case DOT: return "."; 
+			default: return "";
+		}
+		
+	}
+	
+	public Operators stringToOperator(String a) {
+		switch (a) {
+			case "+": return Operators.PLUS;
+			case "|": return Operators.OR;
+			case "*": return Operators.STAR;
+			case ".": return Operators.DOT;
+			default: return Operators.STRING;
 		}
 	}
-		
-	private RegulExpress OR(RegulExpress regul) {
-		RegulExpress expr = new RegulExpress();
-		expr.set_left(this);
-		this.set_op(Operators.OR);
-		this.set_right(regul);
-		
-		return expr;
+	
+	public void setOperator(Operators o) {
+		this._currentOperator = o;
 	}
 	
-	private RegulExpress PLUS(RegulExpress regul) {
-		RegulExpress expr = new RegulExpress();
-		expr.set_left(this);
-		this.set_op(Operators.PLUS);
+	public RegulExpress OR(RegulExpress e) {
+		RegulExpress tempExp = new RegulExpress();
+		tempExp.setOperator(Operators.OR);
+		tempExp.setLeft(this);
+		tempExp.setRight(e);
 		
-		return expr;
+		return tempExp;		
 	}
 	
-	private RegulExpress STAR(RegulExpress regul) {
-		RegulExpress expr = new RegulExpress();
-		expr.set_left(this);
-		this.set_op(Operators.STAR);
+	public boolean isValid(String s) {
 		
-		return expr;
-	}
-	
-	private RegulExpress DOT(RegulExpress regul) {
-		RegulExpress expr = new RegulExpress();
-		expr.set_left(this);
-		expr.set_right(regul);
-		this.set_op(Operators.DOT);
+		switch (this._currentOperator)
+		{
 		
-		return expr;
-	}
-	
-	public RegulExpress get_right() {
-		return _right;
-	}
-
-
-	public void set_right(RegulExpress _right) {
-		this._right = _right;
-	}
-
-
-	public RegulExpress get_left() {
-		return _left;
-	}
-
-
-	public void set_left(RegulExpress _left) {
-		this._left = _left;
-	}
-
-
-	public Operators get_op() {
-		return _op;
-	}
-
-
-	public void set_op(Operators _op) {
-		this._op = _op;
-	}
-
-
-	private static Operators getOperator(String s) {
-		if (s.length() != 1)
-			return null;
-		
-		
-		char operator = s.toCharArray()[0];
-		
-		switch (operator) {
-			case '|': return Operators.OR;
-			case '*': return Operators.STAR;
-			case '+': return Operators.PLUS;
-			case '.': return Operators.DOT;
-			default: return null;
+			case STRING: System.out.println("True:?"+ this._value.get() + " and "+ s); return this._value.get().equals(s);
+			case OR: return _left.get().isValid(s) || _left.get().isValid(s);
+			case DOT:
+				break;
+			case PLUS:
+				break;
+			case STAR:
+				break;
+			default:
+				break;
 		}
+		
+		return false;
 	}
+	
+	public NDFA toNDFA() {
+		return null;
+	}
+	
+	
 }

@@ -12,17 +12,18 @@ public class Former {
 		//DFA dfa = DFA.fromGraphVizStringToDFA(GraphwizExec.loadTextFile("DFA.gv"));
 		//GraphwizExec.openDotExeCodeString(dfa);
 		
-		DFA ndfa = DFA.GenerateDFA(DFA.DFAGenerationOptions.FULLSTRING, "aab");
+		//DFA ndfa = DFA.GenerateDFA(DFA.DFAGenerationOptions.FULLSTRING, "aab");
 		//GraphwizExec.openDotExeCodeString(ndfa);
-		ndfa = ndfa.minimize();
+		//ndfa = ndfa.minimize();
 		//GraphwizExec.openDotExeCodeString(ndfa);
 		
-		ndfa.isValidString("aab");
+		//ndfa.isValidString("aab");
 //		ndfa.setMethodName("hello");
 //		ndfa = ndfa.minimize();
 //		GraphwizExec.openDotExeCodeString(ndfa);
 //		System.out.println("Done");
 //		System.out.println(ndfa.isValidString("abc"));
+		testRegulExpress();
 	}
 	
 	@SuppressWarnings({"unchecked"})
@@ -57,5 +58,14 @@ public class Former {
 		
 		//boolean thisWorks = GraphwizExec.openDotExeCodeString(dfaJoined);
 		
+	}
+
+
+	private static void testRegulExpress() {
+//		RegulExpress exp1 = new RegulExpress("a");
+//		System.out.println(exp1.validateString("a"));
+		
+		RegulExpress exp2 = new RegulExpress("a|bc");
+		System.out.println(exp2.validateString("a"));
 	}
 }
