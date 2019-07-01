@@ -25,8 +25,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.awt.Dimension;
 import javax.swing.JList;
@@ -46,10 +48,12 @@ public class DFACreator {
 	private JTextField matchStringTextField;
 	private JTextField nameDFATextField;
 	private JPanel dfaImagePanel = new JPanel();
+	private JCheckBox chckbxNewCheckBox = new JCheckBox("Minimise");
 
 	private int _lastSelection;
 
 	private NDFA _lastDFA;
+	private RegulExpress ex;
 
 	/**
 	 * Launch the application.
@@ -76,6 +80,8 @@ public class DFACreator {
 	private JTextField inputProductionRulesField;
 	private JTextField userExpressTextField;
 	private JTextField userTestStringTextField;
+	
+	public Optional<NDFA> _otherDFA = Optional.ofNullable(null);
 
 	public DFACreator() {
 		initialize();
@@ -109,9 +115,6 @@ public class DFACreator {
 		userTestStringTextField.setBounds(125, 76, 368, 20);
 		regulExpPanel.add(userTestStringTextField);
 		userTestStringTextField.setColumns(10);
-		
-
-
 		
 		JLabel lblExpression = new JLabel("Expression:");
 		lblExpression.setBounds(10, 32, 76, 14);
@@ -158,7 +161,7 @@ public class DFACreator {
 		});
 		btnGenerate.setBounds(319, 107, 101, 23);
 		regulExpPanel.add(btnGenerate);
-
+		
 		matchStringTextField = new JTextField();
 		matchStringTextField.setBounds(251, 37, 225, 20);
 		dfaPanel.add(matchStringTextField);
@@ -172,7 +175,7 @@ public class DFACreator {
 		dfaLabel_1.setBounds(10, 11, 1560, 844);
 		dfaImagePanel.add(dfaLabel_1);
 		
-		JCheckBox chckbxNewCheckBox = new JCheckBox("Minimise");
+		
 		chckbxNewCheckBox.setBounds(581, 36, 75, 23);
 		dfaPanel.add(chckbxNewCheckBox);
 		
@@ -181,44 +184,10 @@ public class DFACreator {
 		dfaPanel.add(chckbxReverse);
 
 		JButton dfaFromMatchStringGenerateButton = new JButton("Generate");
-		dfaFromMatchStringGenerateButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
 		dfaFromMatchStringGenerateButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				// Remove old image
-				DFA dfa = DFACommandParser.ParseMultiString(matchStringTextField.getText());
-				
-				if (chckbxNewCheckBox.isSelected())
-					dfa = dfa.minimize();
-//				if (chckbxReverse.isSelected())
-//					dfa = dfa.reverse();
-
-				String dfaName = nameDFATextField.getText();
-				dfa.setMethodName(dfaName);
-
-				if (dfaName.length() > 0) {
-					// Create new image
-					JLabel dfaLabel = new JLabel("Empty");
-					var bounds = dfaImagePanel.getBounds();
-
-					if (!(dfaImagePanel.getComponents().length > 0))
-						dfaImagePanel.remove(0);
-
-					dfaLabel = GraphwizExec.generateDFAJLabel(dfa);
-					dfaLabel.setBounds(bounds);
-
-					if (dfaImagePanel.getComponents().length > 0)
-						dfaImagePanel.remove(0);
-
-					dfaImagePanel.add(dfaLabel);
-					dfaImagePanel.revalidate();
-					dfaImagePanel.repaint();
-				} else {
-					GraphwizExec.infoBox("No name present. Please fill in a filename.", "No Filename present");
-				}
+				genNDFAPanel();
 
 			}
 		});
@@ -247,6 +216,33 @@ public class DFACreator {
 		});
 		btnSave.setBounds(486, 11, 89, 23);
 		dfaPanel.add(btnSave);
+		
+		JButton btnShowdfa = new JButton("showNDFA");
+		btnShowdfa.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// Get Regul Expression
+				String userExpression = userExpressTextField.getText();
+				
+				if (userExpression.length() < 1)
+					return; // Do nothing no expression.
+				
+				String userString = userTestStringTextField.getText();
+				
+				if (userString.length() < 1)
+					return;
+				
+				var expression = new RegulExpress(userExpression);
+				
+				_otherDFA = Optional.ofNullable(expression.genNDFA());
+				tabbedPane.setSelectedIndex(1);
+				tabbedPane.revalidate();
+				
+				genNDFAPanel();
+			}
+		});
+		btnShowdfa.setBounds(503, 107, 89, 23);
+		regulExpPanel.add(btnShowdfa);
 
 		nameDFATextField = new JTextField();
 		nameDFATextField.setBounds(251, 12, 225, 20);
@@ -384,6 +380,54 @@ public class DFACreator {
 			}
 		});
 
+	}
+
+	protected void genNDFAPanel() {
+		System.out.println("???");
+		// Remove old image
+		NDFA dfa;
+		if (!_otherDFA.isEmpty()) {
+			dfa = _otherDFA.get();
+		}
+		else 
+			dfa = DFACommandParser.ParseMultiString(matchStringTextField.getText());
+		
+		if (chckbxNewCheckBox.isSelected())
+			dfa = dfa.minimize();
+//		if (chckbxReverse.isSelected())
+//			dfa = dfa.reverse();
+
+		String dfaName = nameDFATextField.getText();
+		dfa.setMethodName(dfaName);
+	
+		if (dfa.getMethodName().length() == 0)
+			dfa.setMethodName("lol");
+
+		
+		if (dfa.getMethodName().length() > 0) {
+			// Create new image
+			
+			JLabel dfaLabel = new JLabel("Empty");
+			var bounds = dfaImagePanel.getBounds();
+
+			if (!(dfaImagePanel.getComponents().length > 0))
+				dfaImagePanel.remove(0);
+
+			dfaLabel = GraphwizExec.generateDFAJLabel(dfa);
+			dfaLabel.setBounds(bounds);
+			
+			System.out.println("Still here");
+
+			if (dfaImagePanel.getComponents().length > 0)
+				dfaImagePanel.remove(0);
+
+			dfaImagePanel.add(dfaLabel);
+			dfaImagePanel.revalidate();
+			dfaImagePanel.repaint();
+		} else {
+			GraphwizExec.infoBox("No name present. Please fill in a filename.", "No Filename present");
+		}
+		
 	}
 
 	private DefaultListModel<String> getDfaListDataModel() {
