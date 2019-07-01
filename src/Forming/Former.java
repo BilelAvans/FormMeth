@@ -65,9 +65,16 @@ public class Former {
 //		RegulExpress exp1 = new RegulExpress("a");
 //		System.out.println(exp1.validateString("a"));
 		
-		RegulExpress exp2 = new RegulExpress("a|bc");
-		System.out.println(exp2.validateString("bc"));
-		System.out.println(exp2.validateString("a"));
-		System.out.println(exp2.validateString("ef"));
+//		RegulExpress exp2 = new RegulExpress("a|bc");
+//		System.out.println(exp2.validateString("bc"));
+//		System.out.println(exp2.validateString("a"));
+//		System.out.println(exp2.validateString("ef"));
+		//System.out.println(RegulExpress.consistsOfRepeatingStrings("bcbcbc", "bc"));
+		
+//		RegulExpress exp3 = new RegulExpress("a+");
+//		System.out.println(exp3.validateString("aaa"));
+		
+		RegulExpress exp3 = new RegulExpress("efsef");
+		System.out.println(exp3.validateString("efsef"));
 	}
 }
