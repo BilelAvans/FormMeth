@@ -3,7 +3,10 @@ package Forming;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import Parsing.Tuples.ThreeTuple;
 import Parsing.Tuples.TwoTuple;
@@ -20,6 +23,8 @@ public class RegulExpress {
 	Optional<String> _value;
 
 	public Optional<RegulExpress> _left = Optional.ofNullable(null), _right = Optional.ofNullable(null);
+	
+	public NDFA _createdNFA = NDFA.Empty();
 
 	private RegulExpress() {
 	}
@@ -59,8 +64,90 @@ public class RegulExpress {
 	public Operators getOperator() {
 		return this._currentOperator;
 	}
+	
+	public NDFA genNDFA() {
+		 Set<String> signs = new LinkedHashSet<>();
+		
+		ArrayList<DFANode> nodes = new ArrayList<DFANode>();
+		DFANode _lastNode = new DFANode(0, false);
+		
+		RegulExpress ex = this;
+		
+		while (ex.hasLeft()) {
+			// Set to most left
+			ex = ex.getLeft().get();
+		}
+		
+		while (ex != null) {
+			// Check for or
+			if (!ex.getRight().isEmpty() && ex.getRight().get().isOperator(Operators.OR))
+			{
+				ArrayList<DFANode> listLeft = DFA.genNodes(ex._value.get(), nodes.size());
+				ArrayList<DFANode> listRight = DFA.genNodes(ex._value.get(), nodes.size() + listLeft.size());
+				
+				TransitionRule[] rules = new TransitionRule[] { listLeft.get(0).get_transitions().get(0), listRight.get(0).get_transitions().get(0)};
+				
+				nodes.get(nodes.size() - 1).addTransitions(rules);
+				
+				listLeft.remove(0);
+				listRight.remove(0);
+				
+				var right = listRight.get(listRight.indexOf(listLeft.size() - 1));
+				var left = listLeft.get(listLeft.indexOf(listLeft.size() - 2));
+				
+				left.addTransitions(new TransitionRule(ex._value.get(), right.get_state()));
+				
+				nodes.addAll(listLeft);
+				nodes.addAll(listRight);
+			} else {
+				switch (ex.getOperator()) {
+				
+				case STRING: {
+					signs.add(ex._value.get());
+					ArrayList<DFANode> list = DFA.genNodes(ex._value.get(), 0);
+					
+					if (nodes.size() != 0)
+					nodes.get(nodes.size() - 1).addTransitions(new TransitionRule(ex._value.get(), nodes.size()));
+					
+					nodes.addAll(list);
+				}
+					break;
+				case STAR: {
+					signs.add(ex.getRight().get()._value.get());
+					ArrayList<DFANode> list = DFA.genNodes(ex.getRight().get()._value.get(), 0);
+					list.get(list.size()).addTransitions(new TransitionRule(NDFA.EmptySign, list.get(0).get_state()));
+					nodes.addAll(list);
+					
+				} break;
+				case PLUS: {
+					signs.add(ex.getRight().get()._value.get());
+					ArrayList<DFANode> list = DFA.genNodes(ex.getRight().get()._value.get(), 0);
+					list.get(list.size()).addTransitions(new TransitionRule(NDFA.EmptySign, list.get(0).get_state()));
+					list.get(0).addTransitions(new TransitionRule(NDFA.EmptySign, list.get(0).get_state()));
+					nodes.addAll(list);
+				} break;
+			
+			}
+			}	
+			
+			System.out.println("done");
+			
+			if (!ex.hasRight())
+				break;
+			
+		}
+		System.out.println("done");
+		
+		var alfa = new Alfabet(signs.toArray(String[]::new));
+		return new NDFA(alfa, 0, nodes.toArray(DFANode[]::new));
+		
+	}
 
 	public boolean validateString(String s) {
+		
+		ArrayList<DFANode> nodes = new ArrayList<DFANode>();
+		DFANode _lastNode = new DFANode(0, false);
+		
 		var ex = Optional.ofNullable(this);
 		int stringPos = 0;
 
@@ -87,7 +174,6 @@ public class RegulExpress {
 					length--;
 					counter++;
 				}
-				System.out.println("counter now: "+ counter);
 			} catch (Exception e) {
 				counter += str.length();
 				toStringWithoutErrors = false;
@@ -95,7 +181,6 @@ public class RegulExpress {
 
 
 			if ((ex.get().isValid(str) || RegulExpress.consistsOfRepeatingStrings(str, pattern, true)) && toStringWithoutErrors) {
-				System.out.println(counter);
 				// Raise counter by amount of characters read
 				ex = ex.get().getRight();
 
@@ -116,12 +201,10 @@ public class RegulExpress {
 					} 
 					else if (currentOperator == Operators.STAR) {
 						// Repeat
-						System.out.println("Got: "+ str + " and "+ pattern);
 						if (!RegulExpress.consistsOfRepeatingStrings(str, pattern, true)) {
 							return false;
 						} else {
 
-							System.out.println("star");
 							counter += str.length();
 							ex = ex.get().getRight();
 						}

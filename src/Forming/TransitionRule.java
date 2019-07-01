@@ -15,6 +15,11 @@ public class TransitionRule<T> implements Serializable {
 		this._goTo = goTo;
 	}
 	
+	public TransitionRule(Character sign, T goTo) {
+		this._sign = Character.toString(sign);
+		this._goTo = goTo;
+	}
+	
 	public String getSign() {
 		return _sign;
 	}

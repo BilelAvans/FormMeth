@@ -17,6 +17,8 @@ public class Former {
 		//ndfa = ndfa.minimize();
 		//GraphwizExec.openDotExeCodeString(ndfa);
 		
+		NDFA ndfa = new RegulExpress("aa|bs").genNDFA();
+		GraphwizExec.openDotExeCodeString(ndfa);
 		//ndfa.isValidString("aab");
 //		ndfa.setMethodName("hello");
 //		ndfa = ndfa.minimize();
@@ -74,7 +76,7 @@ public class Former {
 //		RegulExpress exp3 = new RegulExpress("a+");
 //		System.out.println(exp3.validateString("aaa"));
 		
-		RegulExpress exp3 = new RegulExpress("efsef");
-		System.out.println(exp3.validateString("efsef"));
+//		RegulExpress exp3 = new RegulExpress("efsef|");
+//		System.out.println(exp3.validateString("efsef"));
 	}
 }

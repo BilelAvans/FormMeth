@@ -157,6 +157,22 @@ public class DFA extends NDFA {
 
 	}
 	
+	public static ArrayList<DFANode> genNodes(String a, int incBy) {
+		int counter = incBy;
+		ArrayList<DFANode> nodes = new ArrayList<DFANode>();
+		
+		DFANode node = new DFANode(0, a.length() - 1 == counter);
+		
+		for (char c: a.toCharArray()) {
+			node.addTransitions(new TransitionRule(c, counter + 1));		
+			nodes.add(node);
+			node = new DFANode(counter, a.length() - 1 == counter);
+			counter++;
+		}
+		
+		return nodes;
+	}
+	
 	public DFA minimize() {
 		DFA dfa = new Cloon<DFA>(this).get_ob();
 
