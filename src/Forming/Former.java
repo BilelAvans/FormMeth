@@ -66,6 +66,8 @@ public class Former {
 //		System.out.println(exp1.validateString("a"));
 		
 		RegulExpress exp2 = new RegulExpress("a|bc");
+		System.out.println(exp2.validateString("bc"));
 		System.out.println(exp2.validateString("a"));
+		System.out.println(exp2.validateString("ef"));
 	}
 }

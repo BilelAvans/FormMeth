@@ -38,7 +38,7 @@ public class RegulExpress {
 			// Found operator, split this stuff.
 			this._left = Optional.ofNullable(new RegulExpress(s.substring(0, pos)));
 			this._right = Optional.ofNullable(new RegulExpress(s.substring(pos + 1, s.length())));
-			System.out.println(op.get());
+			//System.out.println(op.get());
 			this._currentOperator = stringToOperator(op.get());
 		}	else {
 			System.out.println("Got val: "+ s);
@@ -58,38 +58,84 @@ public class RegulExpress {
 		int stringPos = 0;
 		
 		boolean lastWasTrue;
+		Operators currentOperator;
 		
 		while (ex.get().hasLeft()) {
 			// Set to most left
 			ex = ex.get().getLeft();
 		}
-		
-		for (char c: s.toCharArray()) {
-			System.out.println("Got char: "+ c);
-			if (ex.get().isValid(Character.toString(c))) {
-				System.out.println("Was here once");
+		int counter = 0; 
+		for (char c = s.toCharArray()[counter]; counter < s.length(); c = s.toCharArray()[counter], counter++) {
+
+			// Check if matches criteria
+			String str = "";
+			int length = ex.get()._value.get().length();
+			while (length > 0) {
+				str += s.toCharArray()[counter];
+				length--;
+				counter++;
+			}			
+			
+			if (ex.get().isValid(str)) {
+				// Raise counter by amount of characters read
+				lastWasTrue = true;
+				
 				ex = ex.get().getRight();
 				
 				if (!ex.isEmpty()) {
-					if (ex.get().getOperator() == Operators.OR) {
-						// Go to next operator, skip all
+					currentOperator = ex.get().getOperator();
+					if (currentOperator == Operators.OR) {
+						// First part is true anyway, ignore until next operator
 						while (!ex.isEmpty() && !ex.get().isOperator()) {
 							ex = ex.get().getRight();
 						}
 					}
+					else if (currentOperator == Operators.STAR) {
+						// Repeat
+					}
+					else if (currentOperator == Operators.PLUS) {
+						
+					}
+					else if (currentOperator == Operators.DOT) {
+						
+					}
+					//else if (ex.g)
 				}
 				else // Right is empty, nothing more todo
 					return true;
 			} else {
-				return false;
+				// Find OR for a chance of success
+				while (!ex.isEmpty() && !ex.get().isOperator(Operators.OR)){
+					ex = ex.get().getRight();
+				}
+				
+				// Found or?
+				
+				if (ex.isEmpty())
+					return false;
+
+				
+				if (ex.get().isValid(str)) {
+					if (ex.get().hasRight())
+						ex = ex.get().getRight();
+					else 
+						return true;
+					
+				} else {
+					return false;
+				}
 			}
 		}
 		
-		return false;
+		return true;
 	}
 	
 	public boolean isOperator() {
 		return this._currentOperator != Operators.STRING;
+	}
+	
+	public boolean isOperator(Operators op) {
+		return this._currentOperator != op;
 	}
 	
 	public void setLeft(RegulExpress re) {

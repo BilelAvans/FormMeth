@@ -12,6 +12,7 @@ import Forming.Alfabet;
 import Forming.Grammar;
 import Forming.NDFA;
 import Forming.ProductionRule;
+import Forming.RegulExpress;
 import Forming.TransitionRule;
 import Parsing.DFACommandParser;
 import Parsing.FileStorage;
@@ -71,6 +72,8 @@ public class DFACreator {
 	private JTextField grammarNameTextField;
 	private JTextField alfabetTextField;
 	private JTextField inputProductionRulesField;
+	private JTextField userExpressTextField;
+	private JTextField userTestStringTextField;
 
 	public DFACreator() {
 		initialize();
@@ -89,26 +92,78 @@ public class DFACreator {
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setBounds(0, 0, 1620, 852);
 		frame.getContentPane().add(tabbedPane);
+		
+		JPanel regulExpPanel = new JPanel();
+		tabbedPane.addTab("RegulExp", null, regulExpPanel, null);
+		regulExpPanel.setLayout(null);
+		
+		
+		userExpressTextField = new JTextField();
+		userExpressTextField.setBounds(125, 32, 368, 20);
+		regulExpPanel.add(userExpressTextField);
+		userExpressTextField.setColumns(10);
+		
+		userTestStringTextField = new JTextField();
+		userTestStringTextField.setBounds(125, 76, 368, 20);
+		regulExpPanel.add(userTestStringTextField);
+		userTestStringTextField.setColumns(10);
+		
 
-		JPanel panel = new JPanel();
-		tabbedPane.addTab("DFA", null, panel, null);
-		panel.setLayout(null);
+
+		
+		JLabel lblExpression = new JLabel("Expression:");
+		lblExpression.setBounds(10, 32, 76, 14);
+		regulExpPanel.add(lblExpression);
+		
+		JLabel lblTestString = new JLabel("Test String");
+		lblTestString.setBounds(10, 76, 76, 14);
+		regulExpPanel.add(lblTestString);
+		
+		JLabel isValidStringLabel = new JLabel("?");
+		isValidStringLabel.setBounds(445, 111, 48, 14);
+		regulExpPanel.add(isValidStringLabel);
+
+		JPanel dfaPanel = new JPanel();
+		tabbedPane.addTab("DFA", null, dfaPanel, null);
+		dfaPanel.setLayout(null);
 
 		JLabel lblGenerateDfa = new JLabel("Name");
 		lblGenerateDfa.setBounds(178, 15, 34, 14);
-		panel.add(lblGenerateDfa);
+		dfaPanel.add(lblGenerateDfa);
 
 		JLabel lblMatchString = new JLabel("match String");
 		lblMatchString.setBounds(178, 40, 75, 14);
-		panel.add(lblMatchString);
+		dfaPanel.add(lblMatchString);
+		
+		JButton btnGenerate = new JButton("Valid String?");
+		btnGenerate.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Get Regul Expression
+				String userExpression = userExpressTextField.getText();
+				
+				if (userExpression.length() < 1)
+					return; // Do nothing no expression.
+				
+				String userString = userTestStringTextField.getText();
+				
+				if (userString.length() < 1)
+					return;
+				
+				var expression = new RegulExpress(userExpression);
+				
+				isValidStringLabel.setText(expression.isValid(userString) ? "Valid" : "Non Valid");
+			}
+		});
+		btnGenerate.setBounds(319, 107, 101, 23);
+		regulExpPanel.add(btnGenerate);
 
 		matchStringTextField = new JTextField();
 		matchStringTextField.setBounds(251, 37, 225, 20);
-		panel.add(matchStringTextField);
+		dfaPanel.add(matchStringTextField);
 		matchStringTextField.setColumns(10);
 
 		dfaImagePanel.setBounds(174, 61, 1591, 866);
-		panel.add(dfaImagePanel);
+		dfaPanel.add(dfaImagePanel);
 		dfaImagePanel.setLayout(null);
 
 		JLabel dfaLabel_1 = new JLabel("New label");
@@ -150,7 +205,7 @@ public class DFACreator {
 		});
 
 		dfaFromMatchStringGenerateButton.setBounds(486, 36, 89, 23);
-		panel.add(dfaFromMatchStringGenerateButton);
+		dfaPanel.add(dfaFromMatchStringGenerateButton);
 
 		JButton btnSave = new JButton("Save");
 		btnSave.addMouseListener(new MouseAdapter() {
@@ -172,11 +227,11 @@ public class DFACreator {
 			}
 		});
 		btnSave.setBounds(486, 11, 89, 23);
-		panel.add(btnSave);
+		dfaPanel.add(btnSave);
 
 		nameDFATextField = new JTextField();
 		nameDFATextField.setBounds(251, 12, 225, 20);
-		panel.add(nameDFATextField);
+		dfaPanel.add(nameDFATextField);
 		nameDFATextField.setColumns(10);
 		this.dfaItemList.setModel(new DefaultListModel<String>());
 
@@ -204,11 +259,11 @@ public class DFACreator {
 		});
 
 		dfaItemList.setBounds(10, 63, 154, 848);
-		panel.add(dfaItemList);
+		dfaPanel.add(dfaItemList);
 
-		JPanel panel_1 = new JPanel();
-		tabbedPane.addTab("Grammar", null, panel_1, null);
-		panel_1.setLayout(null);
+		JPanel grammarPanel = new JPanel();
+		tabbedPane.addTab("Grammar", null, grammarPanel, null);
+		grammarPanel.setLayout(null);
 
 		JButton button = new JButton("Save");
 		button.addActionListener(new ActionListener() {
@@ -216,54 +271,54 @@ public class DFACreator {
 			}
 		});
 		button.setBounds(1099, 36, 89, 23);
-		panel_1.add(button);
+		grammarPanel.add(button);
 
 		grammarNameTextField = new JTextField();
 		grammarNameTextField.setColumns(10);
 		grammarNameTextField.setBounds(241, 12, 225, 20);
-		panel_1.add(grammarNameTextField);
+		grammarPanel.add(grammarNameTextField);
 
 		JLabel label = new JLabel("Name");
 		label.setBounds(168, 15, 34, 14);
-		panel_1.add(label);
+		grammarPanel.add(label);
 
 		JLabel lblAlfabet = new JLabel("alfabet");
 		lblAlfabet.setBounds(168, 40, 75, 14);
-		panel_1.add(lblAlfabet);
+		grammarPanel.add(lblAlfabet);
 
 		alfabetTextField = new JTextField();
 		alfabetTextField.setColumns(10);
 		alfabetTextField.setBounds(241, 37, 225, 20);
-		panel_1.add(alfabetTextField);
+		grammarPanel.add(alfabetTextField);
 
 		inputProductionRulesField = new JTextField();
 		inputProductionRulesField.setBounds(241, 62, 225, 20);
-		panel_1.add(inputProductionRulesField);
+		grammarPanel.add(inputProductionRulesField);
 		inputProductionRulesField.setColumns(10);
 
 		JList list = new JList();
 		list.setBounds(0, 131, 154, 780);
-		panel_1.add(list);
+		grammarPanel.add(list);
 
 		JLabel lblPrRules = new JLabel("Pr Rules");
 		lblPrRules.setBounds(168, 65, 48, 14);
-		panel_1.add(lblPrRules);
+		grammarPanel.add(lblPrRules);
 
 		JLabel label5 = new JLabel("Start");
 		label5.setBounds(493, 15, 48, 14);
-		panel_1.add(label5);
+		grammarPanel.add(label5);
 
 		JTextPane startStateTextField = new JTextPane();
 		startStateTextField.setBounds(530, 12, 154, 20);
-		panel_1.add(startStateTextField);
+		grammarPanel.add(startStateTextField);
 
 		JTextArea productionRulesTextArea = new JTextArea();
 		productionRulesTextArea.setBounds(168, 127, 1321, 629);
-		panel_1.add(productionRulesTextArea);
+		grammarPanel.add(productionRulesTextArea);
 
 		JButton button_1 = new JButton("Generate");
 		button_1.setBounds(1099, 65, 89, 23);
-		panel_1.add(button_1);
+		grammarPanel.add(button_1);
 		button_1.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
