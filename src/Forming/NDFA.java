@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 
 import Parsing.ArrayUtils;
 import Parsing.IMethodAsString;
+import Parsing.MoreFunctions.TwoParamFunction;
 
 public class NDFA implements IMethodAsString, Serializable {
 
@@ -307,6 +309,17 @@ public class NDFA implements IMethodAsString, Serializable {
 			}
 		}
 	}
+	
+	public static ArrayList<DFANode> incStatesBy(ArrayList<DFANode> nodes, int size) {
+		for (DFANode node: nodes) {
+			node.set_state(node.get_state() + size);
+			for (TransitionRule<Integer> tr: node.get_transitions()) {
+				tr.setGoTo(tr.getGoTo() + size);
+			}
+		}
+		
+		return nodes;
+	}
 
 	protected Optional<DFANode> getNodeByState(Integer state) {
 		return this._nodes.stream().filter(r -> r.get_state() == state).findAny();
@@ -364,6 +377,123 @@ public class NDFA implements IMethodAsString, Serializable {
 		String newChar = Character.toString((('A') - 1 + count));
 		
 		return newChar;
+	}
+	
+	public static ArrayList<DFANode> genNodes(String a, int incBy) {
+		int counter = incBy;
+		ArrayList<DFANode> nodes = new ArrayList<DFANode>();
+		
+		DFANode node = new DFANode(counter, false);
+		
+		for (char c: a.toCharArray()) {
+			node.addTransitions(new TransitionRule(c, counter + 1));		
+			nodes.add(node);
+			node = new DFANode(counter + 1, false);
+			counter++;
+		}
+		
+		return nodes;
+	}
+	
+	public NDFA minimize() {
+		NDFA dfa = new Cloon<NDFA>(this).get_ob();
+
+		ArrayList<ArrayList<DFANode>> allNodes = new ArrayList<>();
+		allNodes.add(dfa.getStartStates());
+		allNodes.add(dfa.getEndStates());
+		
+		// Function to check in which arraylist a specific node is
+		// Needed to caluclate block name/number
+		TwoParamFunction<ArrayList<ArrayList<DFANode>>, DFANode, Integer> groupOf = (list, node) -> {
+			for (int counter = 0; counter < list.size(); counter++) {
+				if (list.get(counter).contains(node))
+					return counter;
+			}
+			// -1 = error code.
+			return -1;
+		};		
+		
+		// Loop until we cant minimalize anymore
+		for (boolean blocksComplete = false; !blocksComplete; ) {
+			blocksComplete = true;
+			
+			ArrayList<ArrayList<DFANode>> newNodes = new ArrayList<>();
+		
+			for (ArrayList<DFANode> nodesList: allNodes) {
+				//ArrayList<String> groups = new ArrayList<String>();
+				HashMap<DFANode, String> map = new HashMap<>();
+				
+				for (DFANode node: nodesList) {
+					String paths = "";
+					
+					for(String s: dfa.get_alfabet().getAllSigns()) {
+						// Find out where it all leads
+						if (!paths.isEmpty()) {
+							paths += ",";
+						} 
+						
+						// Get goto
+						Optional<TransitionRule<Integer>> tr = node.getTransitionRuleBySymbol(s);
+						
+						if (!tr.isEmpty())
+							paths += String.valueOf(groupOf.apply(allNodes, new DFANode(tr.get().getGoTo())));
+
+					}
+					
+					map.put(node, paths);
+					
+				}
+				// Check a set from all groups and check if we have more than 1 (if so, we need to rearrange)
+				Set<String> uniqueGroups = new HashSet<String>(map.values());
+				boolean isCorrect = uniqueGroups.size() == 1;
+				// All blocks must be complete, so we need this operation
+				blocksComplete &= isCorrect;
+				
+				// Create new groups
+				// Create a group from a unique set values
+				for (String s: uniqueGroups) {
+					// Get all nodes of a group and add them to a new one
+					ArrayList<DFANode> nodesToAdd = new ArrayList<DFANode>(map.entrySet().stream().filter(entry -> entry.getValue().equals(s)).map(kv -> kv.getKey()).collect(Collectors.toList()));
+					//RemoveNodes(allNodes, nodesToAdd);	
+					newNodes.add(nodesToAdd);
+					
+				}
+			}
+			
+			for (ArrayList<DFANode> n: newNodes) {				
+				for (var node: n) {					
+					for (var trans: node.get_transitions()) {
+						int newGoTo = groupOf.apply(newNodes, new DFANode(trans.getGoTo()));
+						trans.setGoTo(newGoTo);
+					}
+					
+					//RemoveNodes(newNodes, n);
+				}
+			}
+			
+			allNodes = newNodes;
+			
+		}
+		
+		// Complete, let's reform our nodes
+		var nodes = new ArrayList<DFANode>();
+		
+		int counter = 0;
+		
+		for (ArrayList<DFANode> group: allNodes) {
+			// Every group becomes 1 node
+			ArrayList<TransitionRule<Integer>> rules = group.get(0).get_transitions();
+			
+			if (!rules.isEmpty())
+			{
+				DFANode node = new DFANode(counter, group.get(0).get_isEndSymbol(), rules.toArray(TransitionRule[]::new));
+				nodes.add(node);
+				counter++;
+			}
+			
+		}
+		System.out.println("Return?");
+		return new NDFA(this._alfabet, 0, nodes.toArray(DFANode[]::new));
 	}
 	
 	

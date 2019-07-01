@@ -161,14 +161,19 @@ public class DFA extends NDFA {
 		int counter = incBy;
 		ArrayList<DFANode> nodes = new ArrayList<DFANode>();
 		
-		DFANode node = new DFANode(0, a.length() - 1 == counter);
+		DFANode node = new DFANode(counter, false);
 		
 		for (char c: a.toCharArray()) {
+			System.out.println("State: "+ (counter + 1));
 			node.addTransitions(new TransitionRule(c, counter + 1));		
 			nodes.add(node);
-			node = new DFANode(counter, a.length() - 1 == counter);
+			node = new DFANode(counter + 1, false);
 			counter++;
 		}
+		
+		nodes.add(node);
+		
+		nodes.get(nodes.size() - 1).set_transitions(new ArrayList<TransitionRule<Integer>>());
 		
 		return nodes;
 	}

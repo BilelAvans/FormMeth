@@ -9,6 +9,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import Forming.Alfabet;
+import Forming.DFA;
 import Forming.Grammar;
 import Forming.NDFA;
 import Forming.ProductionRule;
@@ -37,6 +38,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextPane;
 import javax.swing.JTextArea;
+import javax.swing.JCheckBox;
 
 public class DFACreator {
 
@@ -169,13 +171,30 @@ public class DFACreator {
 		JLabel dfaLabel_1 = new JLabel("New label");
 		dfaLabel_1.setBounds(10, 11, 1560, 844);
 		dfaImagePanel.add(dfaLabel_1);
+		
+		JCheckBox chckbxNewCheckBox = new JCheckBox("Minimise");
+		chckbxNewCheckBox.setBounds(581, 36, 75, 23);
+		dfaPanel.add(chckbxNewCheckBox);
+		
+		JCheckBox chckbxReverse = new JCheckBox("Reverse");
+		chckbxReverse.setBounds(662, 36, 97, 23);
+		dfaPanel.add(chckbxReverse);
 
 		JButton dfaFromMatchStringGenerateButton = new JButton("Generate");
+		dfaFromMatchStringGenerateButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
 		dfaFromMatchStringGenerateButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				// Remove old image
-				NDFA dfa = DFACommandParser.ParseMultiString(matchStringTextField.getText());
+				DFA dfa = DFACommandParser.ParseMultiString(matchStringTextField.getText());
+				
+				if (chckbxNewCheckBox.isSelected())
+					dfa = dfa.minimize();
+//				if (chckbxReverse.isSelected())
+//					dfa = dfa.reverse();
 
 				String dfaName = nameDFATextField.getText();
 				dfa.setMethodName(dfaName);
@@ -260,6 +279,7 @@ public class DFACreator {
 
 		dfaItemList.setBounds(10, 63, 154, 848);
 		dfaPanel.add(dfaItemList);
+		
 
 		JPanel grammarPanel = new JPanel();
 		tabbedPane.addTab("Grammar", null, grammarPanel, null);

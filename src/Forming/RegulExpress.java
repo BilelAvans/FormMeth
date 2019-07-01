@@ -44,19 +44,28 @@ public class RegulExpress {
 			int pos = s.indexOf(op.get());
 
 			// Found operator, split this stuff.
+			System.out.println("LEft: "+ s.substring(0, pos));
+			System.out.println(this._currentOperator);
 			this._left = Optional.ofNullable(new RegulExpress(s.substring(0, pos)));
 			this._left.get().setRight(this);
-			this._right = Optional.ofNullable(new RegulExpress(s.substring(pos + 1, s.length())));
-			this._right.get().setLeft(this);
+			
+			String right = s.substring(pos + 1, s.length());
+			if (right.length() != 0) {
+				this._right = Optional.ofNullable(new RegulExpress(s.substring(pos + 1, s.length())));
+				this._right.get().setLeft(this);
+			} 
+			
 
 			this._currentOperator = stringToOperator(op.get());
+			System.out.println("Created: "+ _currentOperator);
+			
+			System.out.println("Done: "+ this.getLeft().get()._value.get());
 
 		} else {
 			this._value = Optional.ofNullable(s.replace("(",""));
 			this._value = Optional.ofNullable(s.replace(")",""));
 			this._currentOperator = Operators.STRING;
-
-			this.toString();
+			//this.toString();
 		}
 
 	}
@@ -69,31 +78,39 @@ public class RegulExpress {
 		 Set<String> signs = new LinkedHashSet<>();
 		
 		ArrayList<DFANode> nodes = new ArrayList<DFANode>();
-		DFANode _lastNode = new DFANode(0, false);
-		
+		//nodes.add(new DFANode(0, false));
 		RegulExpress ex = this;
+		
+		
+		while (ex.hasRight())
+			ex = ex.getRight().get();
 		
 		while (ex.hasLeft()) {
 			// Set to most left
+			System.out.println(ex.getOperator());
 			ex = ex.getLeft().get();
 		}
+
+		System.out.println(ex.getOperator());
 		
 		while (ex != null) {
-			// Check for or
+			//System.out.println(ex.getOperator());
+			// Check for OR
 			if (!ex.getRight().isEmpty() && ex.getRight().get().isOperator(Operators.OR))
 			{
-				ArrayList<DFANode> listLeft = DFA.genNodes(ex._value.get(), nodes.size());
-				ArrayList<DFANode> listRight = DFA.genNodes(ex._value.get(), nodes.size() + listLeft.size());
+				ArrayList<DFANode> listLeft = DFA.genNodes(ex._value.get(), nodes.size() - 1);
+				ArrayList<DFANode> listRight = DFA.genNodes(ex.getRight().get().getRight().get()._value.get(), nodes.size() + listLeft.size() - 1);
 				
-				TransitionRule[] rules = new TransitionRule[] { listLeft.get(0).get_transitions().get(0), listRight.get(0).get_transitions().get(0)};
+				TransitionRule[] rules = new TransitionRule[] { listLeft.get(0).get_transitions().get(0), listRight.get(0).get_transitions().get(0) };
 				
-				nodes.get(nodes.size() - 1).addTransitions(rules);
+				if (nodes.size() > 0)
+					nodes.get(nodes.size() - 1).addTransitions(rules);
+				
+				var right = listRight.get(listRight.size() - 1);
+				var left = listLeft.get(listLeft.size() - 2);
 				
 				listLeft.remove(0);
 				listRight.remove(0);
-				
-				var right = listRight.get(listRight.indexOf(listLeft.size() - 1));
-				var left = listLeft.get(listLeft.indexOf(listLeft.size() - 2));
 				
 				left.addTransitions(new TransitionRule(ex._value.get(), right.get_state()));
 				
@@ -102,41 +119,55 @@ public class RegulExpress {
 			} else {
 				switch (ex.getOperator()) {
 				
-				case STRING: {
-					signs.add(ex._value.get());
-					ArrayList<DFANode> list = DFA.genNodes(ex._value.get(), 0);
-					
-					if (nodes.size() != 0)
-					nodes.get(nodes.size() - 1).addTransitions(new TransitionRule(ex._value.get(), nodes.size()));
-					
-					nodes.addAll(list);
+					case STRING: {
+						for (char c: ex._value.get().toCharArray()) {
+							signs.add(Character.toString(c));
+						}
+						
+						ArrayList<DFANode> list = DFA.genNodes(ex._value.get(), nodes.size());
+						System.out.println("Lise size: "+ list.size());
+						
+						if (nodes.size() != 0) {
+							nodes.get(nodes.size() - 1).addTransitions(list.get(0).get_transitions().get(0));
+							list.remove(0);
+							list = NDFA.incStatesBy(list, -1);
+						}
+						
+						//list = NDFA.incStatesBy(list, nodes.size());
+						nodes.addAll(list);
+					}
+						break;
+					case STAR: {
+						String lastString = ex.getLeft().get()._value.get();
+						nodes.get(nodes.size() - 1).addTransitions(new TransitionRule(NDFA.EmptySign, nodes.size() - 1 - ex.getLeft().get()._value.get().length()));
+						nodes.get(nodes.size() - ex.getLeft().get()._value.get().length() - 1).addTransitions(new TransitionRule(NDFA.EmptySign, nodes.get(nodes.size() - lastString.length() - 1).get_state()));
+					} break;
+					case PLUS: {
+						nodes.get(nodes.size() - 1).addTransitions(new TransitionRule(NDFA.EmptySign, nodes.size() - 1 - ex.getLeft().get()._value.get().length()));
+						
+//						//signs.add(ex.getLeft().get()._value.get());
+//						ArrayList<DFANode> list = DFA.genNodes(ex.getLeft().get()._value.get(), nodes.size());
+//						list.get(list.size() - 1).addTransitions(new TransitionRule(NDFA.EmptySign, list.get(0).get_state() - ex.getLeft().get()._value.get().length()));
+//						nodes.get(nodes.size() - 1).addTransitions(new TransitionRule(NDFA.EmptySign, list.get(0).get_state() - ex.getLeft().get()._value.get().length()));
+						
+						
+						
+						//nodes.addAll(list);
+					} break;
+			
 				}
-					break;
-				case STAR: {
-					signs.add(ex.getRight().get()._value.get());
-					ArrayList<DFANode> list = DFA.genNodes(ex.getRight().get()._value.get(), 0);
-					list.get(list.size()).addTransitions(new TransitionRule(NDFA.EmptySign, list.get(0).get_state()));
-					nodes.addAll(list);
-					
-				} break;
-				case PLUS: {
-					signs.add(ex.getRight().get()._value.get());
-					ArrayList<DFANode> list = DFA.genNodes(ex.getRight().get()._value.get(), 0);
-					list.get(list.size()).addTransitions(new TransitionRule(NDFA.EmptySign, list.get(0).get_state()));
-					list.get(0).addTransitions(new TransitionRule(NDFA.EmptySign, list.get(0).get_state()));
-					nodes.addAll(list);
-				} break;
-			
-			}
 			}	
-			
-			System.out.println("done");
 			
 			if (!ex.hasRight())
 				break;
+			else 
+				ex = ex.getRight().get();
 			
 		}
-		System.out.println("done");
+		
+		nodes.get(nodes.size() - 1).set_isEndSymbol(true);
+		
+		System.out.println("Nodes seiz: "+ nodes.size());
 		
 		var alfa = new Alfabet(signs.toArray(String[]::new));
 		return new NDFA(alfa, 0, nodes.toArray(DFANode[]::new));
@@ -270,7 +301,7 @@ public class RegulExpress {
 	public boolean isOperator(Operators op) {
 
 		//System.out.println("Is op: " + (this._currentOperator != op));
-		return this._currentOperator != op;
+		return this._currentOperator == op;
 	}
 
 	public void setLeft(RegulExpress re) {
